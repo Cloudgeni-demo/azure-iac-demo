@@ -181,8 +181,8 @@ module "frontdoor-cdn" {
           {
             backend_pool_name = "vmss-mylab"
             forwarding_protocol = "HttpOnly"
-            cache_enabled       = false
-            # cache_duration     = "PT1H"
+            cache_enabled       = true
+            cache_duration     = "PT1H"
           }
         ]
     }
