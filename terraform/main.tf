@@ -71,7 +71,7 @@ module "storageaccount" {
   network_rules = [
     {
       default_action = "Deny"
-      ip_rules       = ["187.107.71.146"]
+      ip_rules       = []
       virtual_network_subnet_ids = [
         module.network.subnet_id
       ]
