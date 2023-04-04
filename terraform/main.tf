@@ -33,19 +33,7 @@ module "network" {
       destination_port_range     = 80
       source_address_prefix      = "AzureFrontDoor.Backend"
       destination_address_prefix = "*"
-    },
-    {
-      name                       = "AllowHttpVictor"
-      priority                   = 101
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_range     = 80
-      source_address_prefix      = "187.107.71.146"
-      destination_address_prefix = "*"
     }
-
 
   ]
 
@@ -177,81 +165,67 @@ module "azure-mysql" {
   ]
 }
 
-# module "frontdoor-cdn" {
-#   depends_on   = [module.dns_record]
-#   source = "git::git@gitlab.com:brmti/digimalls/terraform.modules/frontdoor-cdn.git?ref=2.2.0"
-#   frontdoor_name = "afd-siteswordpress-prd"
-#   friendly_name = "afd-siteswordpress-prd"
-#   resource_group = "RGP-Digimalls-PRD"
-#   backend_pools_send_receive_timeout_seconds = 0
-#   backend_pools_certificate_name_check_enforced = false
-#   routing_rules = [
-#     {
-#         name = "siteswordpress-prd"
-#         accepted_protocols = ["Https"]
-#         frontend_endpoints = ["afd-siteswordpress-prd-azurefd-net","wildcard-sitemalls-com-br","apex-sitemalls-com-br"]
-#         forwarding_configurations = [
-#           {
-#             backend_pool_name = "vmss-siteswordpress-prd"
-#             forwarding_protocol = "HttpsOnly"
-#             cache_enabled       = false
-#             # cache_duration     = "PT1H"
-#           }
-#         ]
-#     },
+module "frontdoor-cdn" {
+  source = "./modules/azure-frontdoor"
+  frontdoor_name = "afd-mylab"
+  friendly_name = "afd-mylab"
+  resource_group = module.resource_group.rg_name
+  backend_pools_send_receive_timeout_seconds = 0
+  backend_pools_certificate_name_check_enforced = false
+  routing_rules = [
+    {
+        name = "mylab-prd"
+        accepted_protocols = ["Http","Https"]
+        frontend_endpoints = ["afd-mylab-azurefd-net"]
+        forwarding_configurations = [
+          {
+            backend_pool_name = "vmss-mylab"
+            forwarding_protocol = "HttpOnly"
+            cache_enabled       = false
+            # cache_duration     = "PT1H"
+          }
+        ]
+    }
+  ]
+
+  backend_pool_load_balancings = [
+    {
+      name = "vmss-mylab"
+    }
+  ]
+
+  backend_pool_health_probes = [
+    {
+      name = "vmss-mylab"
+      enabled = false
+      protocol = "Http"
+      path = "/"
+      interval_in_seconds = 30
+      probe_method = "HEAD"
+    }
+  ]
+
+  backend_pools = [
+    {
+      name = "vmss-mylab"
+      load_balancing_name = "vmss-mylab"
+      health_probe_name = "vmss-mylab"
+      backends = [{
+        address     = module.vmss.lb_ip
+        enabled = true
+        http_port = 80
+      }]
+    }
+  ]
 
 
-#     { 
-#       name               = "redirect-https"
-#       frontend_endpoints = ["afd-siteswordpress-prd-azurefd-net","wildcard-sitemalls-com-br","apex-sitemalls-com-br","amazonasshopping-com-br","wildcard-amazonasshopping-com-br","shoppingmetro-com-br","wildcard-shoppingmetro-com-br","wildcard-shoppingestacaocuiaba-com-br","shoppingestacaocuiaba-com-br","wildcard-shoppingestacao-com-br","shoppingestacao-com-br","wildcard-shoppingdelrey-com-br","shoppingdelrey-com-br","wildcard-goianiashop-com-br","goianiashop-com-br","wildcard-catuaimaringa-com-br","catuaimaringa-com-br","wildcard-norteshopping-com-br","norteshopping-com-br","wildcard-plazaniteroi-com-br","plazaniteroi-com-br","wildcard-catuailondrina-com-br","catuailondrina-com-br","wildcard-shoppingtijuca-com-br","shoppingtijuca-com-br","wildcard-shoppingjardimsul-com-br","shoppingjardimsul-com-br","wildcard-shoppingtambore-com-br","shoppingtambore-com-br","wildcard-shoppingpiracicaba-com-br","shoppingpiracicaba-com-br","wildcard-independenciashopping-com-br","independenciashopping-com-br","wildcard-shoppingcampogrande-com-br","shoppingcampogrande-com-br","wildcard-shoppingestacaobh-com-br","shoppingestacaobh-com-br","wildcard-villagiocaxias-com-br","villagiocaxias-com-br","wildcard-shoppingsaobernardoplaza-com-br","wildcard-shoppingcuritiba-com-br","wildcard-shoppingvilavelha-com-br","wildcard-centershopping-com-br","wildcard-rioanil-com-br","wildcard-moocaplaza-com-br","wildcard-shoppingvillalobos-com-br"]
-#       # "wildcard-shoppingsaobernardoplaza-com-br","shoppingsaobernardoplaza-com-br","wildcard-shoppingcuritiba-com-br","shoppingcuritiba-com-br","wildcard-shoppingvilavelha-com-br","shoppingvilavelha-com-br","wildcard-centershopping-com-br","centershopping-com-br","wildcard-rioanil-com-br","rioanil-com-br","wildcard-moocaplaza-com-br","moocaplaza-com-br","wildcard-shoppingvillalobos-com-br","shoppingvillalobos-com-br"]
-#       accepted_protocols = ["Http"]
-#       redirect_configurations = [{
-#         redirect_protocol = "HttpsOnly"
-#         redirect_type     = "Moved"
-#       }]
-#     }
-#   ]
+  frontend_endpoints = [
+    {
+      name = "afd-mylab-azurefd-net"
+      host_name = "afd-mylab.azurefd.net"
+      custom_https_configuration = {}
+    }
 
-#   backend_pool_load_balancings = [
-#     {
-#       name = "vmss-siteswordpress-prd"
-#     }
-#   ]
-
-#   backend_pool_health_probes = [
-#     {
-#       name = "vmss-siteswordpress-prd"
-#       enabled = false
-#       protocol = "Https"
-#       path = "/"
-#       interval_in_seconds = 30
-#       probe_method = "HEAD"
-#     }
-#   ]
-
-#   backend_pools = [
-#     {
-#       name = "vmss-siteswordpress-prd"
-#       load_balancing_name = "vmss-siteswordpress-prd"
-#       health_probe_name = "vmss-siteswordpress-prd"
-#       backends = [{
-#         address     = local.frontdoor_backend_pool_address
-#         enabled = true
-#         https_port = local.frontdoor_backend_pool_https_port
-#       }]
-#     }
-#   ]
-
-
-#   frontend_endpoints = [
-#     {
-#       name = "afd-siteswordpress-prd-azurefd-net"
-#       host_name = "afd-siteswordpress-prd.azurefd.net"
-#       web_application_firewall_policy_link_id = "/subscriptions/afa218c8-7a43-4c14-b15a-ea8b5b5a4d41/resourceGroups/RGP-Digimalls-PRD/providers/Microsoft.Network/frontdoorWebApplicationFirewallPolicies/WAFsiteswordpress"
-#       custom_https_configuration = {}
-#     }
-
-#   ]
-#     tags =  local.tags
-# }
+  ]
+    tags =  local.tags
+}

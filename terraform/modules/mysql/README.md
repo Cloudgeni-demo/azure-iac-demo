@@ -44,7 +44,7 @@ No modules.
 | <a name="input_region"></a> [region](#input\_region) | Region of database. | `string` | `"eastus"` | no |
 | <a name="input_replica_database_sku"></a> [replica\_database\_sku](#input\_replica\_database\_sku) | Replica database sku if differente from the original one | `string` | `""` | no |
 | <a name="input_replica_region"></a> [replica\_region](#input\_replica\_region) | Region for the replica database | `string` | `"westus"` | no |
-| <a name="input_resource_group"></a> [resource\_group](#input\_resource\_group) | resource group for azure resources | `string` | `"DIGIMALLS_CUPOM_DEV"` | no |
+| <a name="input_resource_group"></a> [resource\_group](#input\_resource\_group) | resource group for azure resources | `any` | n/a | yes |
 | <a name="input_resource_mysql_name"></a> [resource\_mysql\_name](#input\_resource\_mysql\_name) | Name of database resource mysql | `any` | n/a | yes |
 | <a name="input_server_parameters"></a> [server\_parameters](#input\_server\_parameters) | Mysql server parameter | `list(any)` | `[]` | no |
 | <a name="input_size_gb"></a> [size\_gb](#input\_size\_gb) | Database server max size in GB | `string` | n/a | yes |

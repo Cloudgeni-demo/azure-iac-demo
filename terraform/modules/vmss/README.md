@@ -28,7 +28,7 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_admin_username"></a> [admin\_username](#input\_admin\_username) | Admin username | `string` | `"digimalls"` | no |
+| <a name="input_admin_username"></a> [admin\_username](#input\_admin\_username) | Admin username | `string` | `"azureuser"` | no |
 | <a name="input_application_port"></a> [application\_port](#input\_application\_port) | Application port for the health probe | `number` | `80` | no |
 | <a name="input_automatic_instance_repair"></a> [automatic\_instance\_repair](#input\_automatic\_instance\_repair) | Enable auto instance repair | `bool` | `false` | no |
 | <a name="input_autoscaling_email_notification_enabled"></a> [autoscaling\_email\_notification\_enabled](#input\_autoscaling\_email\_notification\_enabled) | Email when autoscaling is triggered | `bool` | `false` | no |

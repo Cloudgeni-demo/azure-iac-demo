@@ -40,7 +40,7 @@ variable "upgrade_mode" {
 variable "admin_username" {
   description = "Admin username"
   type        = string
-  default     = "digimalls"
+  default     = "azureuser"
 
 }
 

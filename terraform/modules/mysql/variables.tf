@@ -1,6 +1,5 @@
 variable "resource_group" {
   description = "resource group for azure resources"
-  default     = "DIGIMALLS_CUPOM_DEV"
 }
 
 variable "region" {
