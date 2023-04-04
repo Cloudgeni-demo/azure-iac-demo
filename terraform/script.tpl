@@ -3,7 +3,7 @@ export HOME="/root"
 export WP_INSTALL_PATH="/var/www/html"
 export WP_INSTALL_LOCK_FILE="/tmp/wp_install.lock"
 #Mount nfs share
-mkdir -p /var/www/html
+mkdir -p $WP_INSTALL_PATH
 
 #NFS
 apt-get -y update
@@ -48,7 +48,7 @@ cat <<EOF >> /etc/apache2/apache2.conf
         AllowOverride All
 </Directory>
 EOF
-chown -R www-data:www-data /var/www/html
+chown -R www-data:www-data $WP_INSTALL_PATH
 systemctl enable apache2
 systemctl restart apache2
 
