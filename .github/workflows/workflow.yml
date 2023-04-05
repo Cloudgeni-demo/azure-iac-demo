@@ -6,7 +6,7 @@ name: deploy_themes
 
 jobs:
 
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
     steps:
 
@@ -19,5 +19,4 @@ jobs:
       uses: azure/CLI@v1
       with:
         inlineScript: |
-          ls
-          az storage blob upload-batch --account-name samywplab  --auth-mode key -d 'wordpress-content/themes' -s ./wp_themes/
+          az storage blob upload-batch --account-name samywplab  --auth-mode key -d 'wordpress-content/themes' -s wp_themes/
