@@ -21,4 +21,4 @@ jobs:
       uses: azure/CLI@v1
       with:
         inlineScript: |
-          az storage blob upload-batch --account-name samywplab  --auth-mode key -d 'wordpress-content/themes' -s wp_themes/astra
+          az storage blob upload-batch --account-name samywplab --auth-mode login -d 'wordpress-content/themes' -s wp_themes/astra
