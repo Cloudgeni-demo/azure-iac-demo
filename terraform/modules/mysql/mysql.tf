@@ -30,6 +30,7 @@ resource "azurerm_mysql_flexible_server" "mysql_flexible_server" {
   lifecycle {
     ignore_changes = [
       zone,
+      high_availability.0.standby_availability_zone
     ]
   }
 

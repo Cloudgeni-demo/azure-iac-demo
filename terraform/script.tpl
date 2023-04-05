@@ -10,7 +10,7 @@ apt-get -y update
 sleep 30
 apt-get install nfs-common -y
 
-bash -c 'echo "samylab.blob.core.windows.net:/samylab/wordpress-content /var/www/html nfs sec=sys,vers=3,nolock,proto=tcp" >> /etc/fstab'
+bash -c 'echo "samywplab.blob.core.windows.net:/samywplab/wordpress-content /var/www/html nfs sec=sys,vers=3,nolock,proto=tcp" >> /etc/fstab'
 mount -a
 
 # Install wordpress if not already installed

@@ -8,18 +8,19 @@ provider "azurerm" {
 locals {
   region = "eastus"
   tags   = {}
+  suffix = "mywplab"
 }
 
 module "resource_group" {
   source = "./modules/resource_group"
-  name   = "RGP-mylab"
+  name   = "rgp-mywplab"
   region = local.region
 
 }
 
 module "network" {
   source         = "./modules/network"
-  name           = "mylab"
+  name           = local.suffix
   resource_group = module.resource_group.rg_name
   region         = local.region
   security_rules = [
@@ -45,7 +46,7 @@ module "storageaccount" {
   source = "./modules/storageaccount"
 
   resource_group            = module.resource_group.rg_name
-  storage_account_name      = "samylab"
+  storage_account_name      = "sa${local.suffix}"
   region                    = local.region
   account_tier              = "Standard"
   account_replication_type  = "ZRS"
@@ -71,7 +72,7 @@ module "storageaccount" {
   network_rules = [
     {
       default_action = "Deny"
-      ip_rules       = []
+      ip_rules       = [module.network.my_ip]
       virtual_network_subnet_ids = [
         module.network.subnet_id
       ]
@@ -85,7 +86,7 @@ module "vmss" {
   depends_on = [
     module.storageaccount
   ]
-  vmss_name                 = "vmss-mylab"
+  vmss_name                 = "vmss-${local.suffix}"
   location                  = local.region
   resource_group_name       = module.resource_group.rg_name
   sku                       = "Standard_B2s"
@@ -140,7 +141,7 @@ module "azure-mysql" {
   source                        = "./modules/mysql"
   resource_group                = module.resource_group.rg_name
   region                        = local.region
-  resource_mysql_name           = "mysqlf-mylab"
+  resource_mysql_name           = "mysqlf-${local.suffix}"
   database_name                 = "wordpress"
   database_sku                  = "GP_Standard_D2ds_v4"
   database_mysql_version        = "8.0.21"
@@ -167,8 +168,8 @@ module "azure-mysql" {
 
 module "frontdoor-cdn" {
   source = "./modules/azure-frontdoor"
-  frontdoor_name = "afd-mylab"
-  friendly_name = "afd-mylab"
+  frontdoor_name = "afd-${local.suffix}"
+  friendly_name = "afd-${local.suffix}"
   resource_group = module.resource_group.rg_name
   backend_pools_send_receive_timeout_seconds = 0
   backend_pools_certificate_name_check_enforced = false
@@ -185,7 +186,20 @@ module "frontdoor-cdn" {
             cache_duration     = "PT1H"
           }
         ]
-    }
+    },
+    {
+        name = "mylab-admin-prd"
+        accepted_protocols = ["Http","Https"]
+        patterns_to_match  = ["/wp-admin/*","/wp-content/plugins/*","/wp-json/*"]
+        frontend_endpoints = ["afd-mylab-azurefd-net"]
+        forwarding_configurations = [
+          {
+            backend_pool_name = "vmss-mylab"
+            forwarding_protocol = "HttpOnly"
+            cache_enabled       = false
+          }
+        ]
+    },
   ]
 
   backend_pool_load_balancings = [
@@ -222,7 +236,7 @@ module "frontdoor-cdn" {
   frontend_endpoints = [
     {
       name = "afd-mylab-azurefd-net"
-      host_name = "afd-mylab.azurefd.net"
+      host_name = "afd-${local.suffix}.azurefd.net"
       custom_https_configuration = {}
     }
 
