@@ -1,12 +1,16 @@
 provider "azurerm" {
   version = "~> 3.50.0"
-  features {}
-  skip_provider_registration = true
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
+  }
+  skip_provider_registration = false
 }
 
 
 locals {
-  region = "eastus"
+  region = "westus"
   tags   = {}
   suffix = "mywplab"
 }
@@ -32,7 +36,7 @@ module "network" {
       protocol                   = "Tcp"
       source_port_range          = "*"
       destination_port_range     = 80
-      source_address_prefix      = "AzureFrontDoor.Backend"
+      source_address_prefix      = "*"
       destination_address_prefix = "*"
     }
 
@@ -49,7 +53,7 @@ module "storageaccount" {
   storage_account_name      = "sa${local.suffix}"
   region                    = local.region
   account_tier              = "Standard"
-  account_replication_type  = "ZRS"
+  account_replication_type  = "LRS"
   account_kind              = "StorageV2"
   enable_https_traffic_only = false #Unsupported with NFS
   is_hns_enabled            = true
@@ -90,7 +94,7 @@ module "vmss" {
   location                  = local.region
   resource_group_name       = module.resource_group.rg_name
   sku                       = "Standard_B2s"
-  zones                     = ["1", "2", "3"]
+  zones                     = []
   upgrade_mode              = "Rolling"
   automatic_instance_repair = true
   custom_data               = filebase64("${path.root}/script.tpl")
@@ -137,22 +141,22 @@ module "vmss" {
 }
 
 
-module "azure-mysql" {
-  source                        = "./modules/mysql"
-  resource_group                = module.resource_group.rg_name
-  region                        = local.region
-  resource_mysql_name           = "mysqlf-${local.suffix}"
-  database_name                 = "wordpress"
-  database_sku                  = "GP_Standard_D2ds_v4"
-  database_mysql_version        = "8.0.21"
-  size_gb                       = "20"
-  auto_grow                     = true
-  backup_retention_days         = 20
-  geo_redundant_backup          = false
-  high_availability_enabled     = true
-  database_mysql_admin_username = "adminsiteswordpress"
-  database_mysql_admin_password = var.database_mysql_admin_password
-  tags                          = local.tags
+module "azure-postgresql" {
+  source                             = "./modules/postgresql"
+  resource_group                     = module.resource_group.rg_name
+  region                             = local.region
+  resource_postgresql_name           = "postgresqlf-${local.suffix}"
+  database_name                      = "wordpress"
+  database_sku                       = "GP_Standard_D2s_v3"
+  database_postgresql_version        = "13"
+  storage_mb                         = 32768
+  backup_retention_days              = 20
+  geo_redundant_backup               = false
+  high_availability_enabled          = false
+  postgresql_zone                    = ""
+  database_postgresql_admin_username = "adminsiteswordpress"
+  database_postgresql_admin_password = var.database_postgresql_admin_password
+  tags                               = local.tags
   vm_nsg_whitelist_ips_ports = [{
     "name"      = "vmss_ip"
     "source_ip" = module.vmss.lb_ip
@@ -160,86 +164,9 @@ module "azure-mysql" {
   }]
   server_parameters = [
     {
-      name  = "require_secure_transport"
-      value = "OFF"
+      name  = "log_statement"
+      value = "all"
     }
   ]
 }
 
-module "frontdoor-cdn" {
-  source = "./modules/azure-frontdoor"
-  frontdoor_name = "afd-${local.suffix}"
-  friendly_name = "afd-${local.suffix}"
-  resource_group = module.resource_group.rg_name
-  backend_pools_send_receive_timeout_seconds = 0
-  backend_pools_certificate_name_check_enforced = false
-  routing_rules = [
-    {
-        name = "mylab-prd"
-        accepted_protocols = ["Http","Https"]
-        frontend_endpoints = ["afd-mylab-azurefd-net"]
-        forwarding_configurations = [
-          {
-            backend_pool_name = "vmss-mylab"
-            forwarding_protocol = "HttpOnly"
-            cache_enabled       = true
-            cache_duration     = "PT1H"
-          }
-        ]
-    },
-    {
-        name = "mylab-admin-prd"
-        accepted_protocols = ["Http","Https"]
-        patterns_to_match  = ["/wp-admin/*","/wp-content/plugins/*","/wp-json/*"]
-        frontend_endpoints = ["afd-mylab-azurefd-net"]
-        forwarding_configurations = [
-          {
-            backend_pool_name = "vmss-mylab"
-            forwarding_protocol = "HttpOnly"
-            cache_enabled       = false
-          }
-        ]
-    },
-  ]
-
-  backend_pool_load_balancings = [
-    {
-      name = "vmss-mylab"
-    }
-  ]
-
-  backend_pool_health_probes = [
-    {
-      name = "vmss-mylab"
-      enabled = false
-      protocol = "Http"
-      path = "/"
-      interval_in_seconds = 30
-      probe_method = "HEAD"
-    }
-  ]
-
-  backend_pools = [
-    {
-      name = "vmss-mylab"
-      load_balancing_name = "vmss-mylab"
-      health_probe_name = "vmss-mylab"
-      backends = [{
-        address     = module.vmss.lb_ip
-        enabled = true
-        http_port = 80
-      }]
-    }
-  ]
-
-
-  frontend_endpoints = [
-    {
-      name = "afd-mylab-azurefd-net"
-      host_name = "afd-${local.suffix}.azurefd.net"
-      custom_https_configuration = {}
-    }
-
-  ]
-    tags =  local.tags
-}

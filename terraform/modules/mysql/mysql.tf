@@ -11,7 +11,7 @@ resource "azurerm_mysql_flexible_server" "mysql_flexible_server" {
   delegated_subnet_id          = var.subnet_id != "" ? var.subnet_id : null
   private_dns_zone_id          = var.private_dns_zone_id != "" ? var.private_dns_zone_id : null
   tags                         = var.tags
-  zone                         = var.mysql_zone
+  zone                         = var.mysql_zone != "" ? var.mysql_zone : null
   storage {
     auto_grow_enabled = var.auto_grow
     iops              = var.iops
