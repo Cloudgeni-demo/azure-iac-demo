@@ -3,7 +3,7 @@ output "subnet_id" {
 }
 
 output "nsg_id" {
-    value = azurerm_network_security_group.nsg[0].id 
+    value = length(azurerm_network_security_group.nsg) > 0 ? azurerm_network_security_group.nsg[0].id : null
 }
 
 output "my_ip" {
