@@ -7,6 +7,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss" {
   sku                 = var.sku
   instances           = var.autoscaling_enabled == true ? var.instances : 0
   admin_username      = var.admin_username
+  disable_password_authentication = true
   custom_data         = var.custom_data != "" ? var.custom_data : null
   zones               = var.zones
   zone_balance        = var.zone_balance
