@@ -46,7 +46,7 @@ resource "azurerm_monitor_autoscale_setting" "vmss_autoscale" {
       custom_emails                         = var.autoscaling_notification_email
     }
   }
+  enabled = var.autoscaling_enabled
   tags  = var.tags
-  count = var.autoscaling_enabled == true && length(var.metrics_trigger) > 0 ? 1 : 0
 
 }
