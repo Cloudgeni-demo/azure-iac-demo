@@ -10,7 +10,11 @@ provider "azurerm" {
 
 locals {
   region = "westus"
-  tags   = {}
+  tags = {
+    "environment" = "dev"
+    "project"     = "mywplab"
+    "owner"       = "cloudgeni"
+  }
   suffix = "mywplab"
 }
 
@@ -18,7 +22,7 @@ module "resource_group" {
   source = "./modules/resource_group"
   name   = "rgp-mywplab"
   region = local.region
-
+  tags   = local.tags
 }
 
 module "network" {
@@ -26,6 +30,7 @@ module "network" {
   name           = local.suffix
   resource_group = module.resource_group.rg_name
   region         = local.region
+  tags           = local.tags
   security_rules = [
     {
       name                       = "AllowHttp"
