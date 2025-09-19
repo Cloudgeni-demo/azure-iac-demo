@@ -140,6 +140,14 @@ module "vmss" {
 }
 
 
+data "azurerm_subscription" "primary" {}
+
+module "monitoring" {
+  source              = "./modules/monitoring"
+  resource_group_name = module.resource_group.rg_name
+  subscription_id     = data.azurerm_subscription.primary.subscription_id
+}
+
 module "azure-postgresql" {
   source                             = "./modules/postgresql"
   resource_group                     = module.resource_group.rg_name
