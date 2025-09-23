@@ -169,3 +169,11 @@ module "azure-postgresql" {
   ]
 }
 
+module "monitoring" {
+  source                = "./modules/monitoring"
+  resource_group_name   = module.resource_group.rg_name
+  subscription_id       = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a"
+  action_group_name     = "wordpress-action-group"
+  action_group_short_name = "wp-ag"
+}
+
