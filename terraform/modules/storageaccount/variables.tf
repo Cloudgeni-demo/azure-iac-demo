@@ -18,7 +18,7 @@ variable "account_tier" {
 
 variable "enable_https_traffic_only" {
   description = "Enable https-only traffic."
-  default     = false
+  default     = true
 }
 
 variable "account_replication_type" {
