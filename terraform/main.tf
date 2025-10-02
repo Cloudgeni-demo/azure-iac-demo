@@ -21,6 +21,28 @@ module "resource_group" {
 
 }
 
+resource "azurerm_monitor_action_group" "prowler_remediation_action_group" {
+  name                = "prowler-remediation-action-group"
+  resource_group_name = module.resource_group.rg_name
+  short_name          = "prowlerag"
+}
+
+resource "azurerm_monitor_activity_log_alert" "delete_policy_assignment_alert" {
+  name                = "delete-policy-assignment-alert"
+  resource_group_name = module.resource_group.rg_name
+  scopes              = [module.resource_group.rg_id]
+  description         = "Alert when a policy assignment is deleted"
+
+  criteria {
+    operation_name = "Microsoft.Authorization/policyAssignments/delete"
+    category       = "Policy"
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.prowler_remediation_action_group.id
+  }
+}
+
 module "network" {
   source         = "./modules/network"
   name           = local.suffix
