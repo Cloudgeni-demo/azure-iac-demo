@@ -58,24 +58,11 @@ module "storageaccount" {
   is_hns_enabled            = true
   nfsv3_enabled             = true
   enable_lock               = true
-  containers = [
-    {
-      name                  = "wordpress-content"
-      container_access_type = "private"
-    },
-    {
-      name                  = "wordpress-content-bkp-weekly"
-      container_access_type = "private"
-    },
-    {
-      name                  = "wordpress-content-bkp-monthly"
-      container_access_type = "private"
-    }
-  ]
+ 
   network_rules = [
     {
-      default_action = "Deny"
-      ip_rules       = [module.network.my_ip]
+      default_action = "Allow"
+      ip_rules       = ["151.41.129.205", "158.248.15.17"]
       virtual_network_subnet_ids = [
         module.network.subnet_id
       ]
