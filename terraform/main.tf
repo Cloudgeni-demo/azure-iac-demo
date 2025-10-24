@@ -165,6 +165,10 @@ module "azure-postgresql" {
     {
       name  = "log_statement"
       value = "all"
+    },
+    {
+       name = "log_retention_days"
+       value = "7"
     }
   ]
 }
