@@ -115,6 +115,30 @@ variable "blob_properties" {
 
 }
 
+variable "customer_managed_key_vault_key_id" {
+  type        = string
+  description = "The ID of the Key Vault Key to use for CMK encryption"
+  default     = null
+}
+
+variable "key_vault_id" {
+  type        = string
+  description = "The ID of the Key Vault"
+  default     = null
+}
+
+variable "tenant_id" {
+  type        = string
+  description = "The tenant ID"
+  default     = null
+}
+
+variable "key_vault_uri" {
+    type = string
+    description = "The URI of the Key Vault"
+    default = null
+}
+
 variable "access_tier" {
   description = " Defines the access tier for BlobStorage, FileStorage and StorageV2 accounts"
   type = string
