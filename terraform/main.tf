@@ -9,9 +9,10 @@ provider "azurerm" {
 
 
 locals {
-  region = "westus"
-  tags   = {}
-  suffix = "mywplab"
+  region                       = "westus"
+  tags                         = {}
+  suffix                       = "mywplab"
+  customer_managed_key_enabled = true
 }
 
 module "resource_group" {
@@ -19,6 +20,12 @@ module "resource_group" {
   name   = "rgp-mywplab"
   region = local.region
 
+}
+
+resource "azurerm_user_assigned_identity" "storage_identity" {
+  resource_group_name = module.resource_group.rg_name
+  location            = local.region
+  name                = "identity-${local.suffix}"
 }
 
 module "network" {
@@ -82,6 +89,25 @@ module "storageaccount" {
     }
   ]
   tags = local.tags
+  customer_managed_key_enabled = local.customer_managed_key_enabled
+  key_vault_name               = "kv-${local.suffix}"
+  identity_type                = "UserAssigned"
+  user_assigned_identity_id    = azurerm_user_assigned_identity.storage_identity.id
+}
+
+data "azurerm_client_config" "current" {}
+
+resource "azurerm_key_vault_access_policy" "storage_account_policy" {
+  count        = local.customer_managed_key_enabled ? 1 : 0
+  key_vault_id = module.storageaccount.key_vault_id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = azurerm_user_assigned_identity.storage_identity.principal_id
+
+  key_permissions = [
+    "Get",
+    "UnwrapKey",
+    "WrapKey",
+  ]
 }
 
 module "vmss" {
