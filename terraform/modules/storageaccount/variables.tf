@@ -120,3 +120,9 @@ variable "access_tier" {
   type = string
   default = "Hot"
 }
+
+variable "infrastructure_encryption_enabled" {
+  description = "Enable infrastructure encryption."
+  type        = bool
+  default     = false
+}

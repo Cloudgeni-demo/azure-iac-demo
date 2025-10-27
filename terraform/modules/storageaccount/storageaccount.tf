@@ -11,6 +11,7 @@ resource "azurerm_storage_account" "storage_account" {
   public_network_access_enabled   = var.public_network_access_enabled 
   nfsv3_enabled             = var.nfsv3_enabled
   min_tls_version           = var.min_tls_version
+  infrastructure_encryption_enabled = var.infrastructure_encryption_enabled
   tags                      = var.tags
 
   dynamic "network_rules" {
