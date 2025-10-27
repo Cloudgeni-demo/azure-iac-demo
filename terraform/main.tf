@@ -45,6 +45,25 @@ module "network" {
 
 
 
+
+module "identity" {
+  source              = "./modules/identity"
+  identity_name       = "id-${local.suffix}"
+  resource_group_name = module.resource_group.rg_name
+  location            = local.region
+  tags                = local.tags
+}
+
+module "keyvault" {
+  source                 = "./modules/keyvault"
+  key_vault_name         = "kv-${local.suffix}"
+  resource_group_name    = module.resource_group.rg_name
+  location               = local.region
+  user_assigned_identity = module.identity.identity
+  key_name               = "storage-key"
+  tags                   = local.tags
+}
+
 module "storageaccount" {
   source = "./modules/storageaccount"
 
@@ -58,6 +77,8 @@ module "storageaccount" {
   is_hns_enabled            = true
   nfsv3_enabled             = true
   enable_lock               = true
+  user_assigned_identity_id = module.identity.identity.id
+  key_vault_key_id          = module.keyvault.key_vault_key_id
   containers = [
     {
       name                  = "wordpress-content"

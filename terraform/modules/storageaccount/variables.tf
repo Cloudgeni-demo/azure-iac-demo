@@ -115,6 +115,16 @@ variable "blob_properties" {
 
 }
 
+variable "user_assigned_identity_id" {
+  description = "The ID of the user-assigned identity to use for encryption"
+  type        = string
+}
+
+variable "key_vault_key_id" {
+  description = "The ID of the key vault key to use for encryption"
+  type        = string
+}
+
 variable "access_tier" {
   description = " Defines the access tier for BlobStorage, FileStorage and StorageV2 accounts"
   type = string
