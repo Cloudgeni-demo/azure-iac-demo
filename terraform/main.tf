@@ -7,6 +7,7 @@ provider "azurerm" {
   skip_provider_registration = false
 }
 
+data "azurerm_client_config" "current" {}
 
 locals {
   region = "westus"
@@ -45,7 +46,20 @@ module "network" {
 
 
 
+
+module "keyvault" {
+  source              = "./modules/keyvault"
+  key_vault_name      = "kv-${local.suffix}"
+  location            = local.region
+  resource_group_name = module.resource_group.rg_name
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  key_name            = "storage-encryption-key"
+  identity_name       = "identity-${local.suffix}"
+  tags                = local.tags
+}
+
 module "storageaccount" {
+
   source = "./modules/storageaccount"
 
   resource_group            = module.resource_group.rg_name
@@ -58,6 +72,9 @@ module "storageaccount" {
   is_hns_enabled            = true
   nfsv3_enabled             = true
   enable_lock               = true
+  identity_ids              = [module.keyvault.identity_id]
+  key_vault_uri             = module.keyvault.key_vault_uri
+  key_name                  = "storage-encryption-key"
   containers = [
     {
       name                  = "wordpress-content"
