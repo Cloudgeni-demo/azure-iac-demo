@@ -13,6 +13,10 @@ resource "azurerm_storage_account" "storage_account" {
   min_tls_version           = var.min_tls_version
   tags                      = var.tags
 
+  identity {
+    type = "SystemAssigned"
+  }
+
   dynamic "network_rules" {
     #check if network_rules has any rule to set below block
     for_each = var.network_rules
@@ -56,5 +60,36 @@ resource "azurerm_storage_container" "container" {
   depends_on = [
     azurerm_storage_account.storage_account
   ]
+}
+
+data "azurerm_storage_account" "storage_account_identity" {
+  name                = azurerm_storage_account.storage_account.name
+  resource_group_name = var.resource_group
+  depends_on          = [azurerm_storage_account.storage_account]
+}
+
+
+
+
+data "azurerm_client_config" "current" {}
+
+resource "azurerm_role_assignment" "storage_account_key_vault_role_assignment" {
+  count                = var.customer_managed_key != null ? 1 : 0
+  scope                = var.customer_managed_key.key_vault_id
+  role_definition_name = "Key Vault Crypto Service Encryption User"
+  principal_id         = data.azurerm_storage_account.storage_account_identity.identity[0].principal_id
+}
+
+
+
+resource "azurerm_storage_account_customer_managed_key" "cmk" {
+  count              = var.customer_managed_key != null ? 1 : 0
+  storage_account_id = azurerm_storage_account.storage_account.id
+  key_vault_id       = var.customer_managed_key.key_vault_id
+  key_name           = var.customer_managed_key.key_name
+  key_version        = var.customer_managed_key.key_version
+  depends_on = [azurerm_role_assignment.storage_account_key_vault_role_assignment]
+
+  
 }
 

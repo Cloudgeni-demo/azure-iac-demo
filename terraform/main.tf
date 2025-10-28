@@ -43,6 +43,14 @@ module "network" {
 
 }
 
+module "keyvault" {
+  source          = "./modules/keyvault"
+  name            = local.suffix
+  region          = local.region
+  resource_group  = module.resource_group.rg_name
+  tags            = local.tags
+}
+
 
 
 module "storageaccount" {
@@ -58,6 +66,11 @@ module "storageaccount" {
   is_hns_enabled            = true
   nfsv3_enabled             = true
   enable_lock               = true
+  customer_managed_key = {
+    key_vault_id = module.keyvault.key_vault_id
+    key_name     = module.keyvault.key_name
+    key_version  = module.keyvault.key_version
+  }
   containers = [
     {
       name                  = "wordpress-content"
