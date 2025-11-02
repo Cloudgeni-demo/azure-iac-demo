@@ -23,7 +23,7 @@ variable "enable_https_traffic_only" {
 
 variable "account_replication_type" {
   description = "Replication type of account."
-  default     = "LRS"
+  default     = "GRS"
 }
 
 variable "containers" {
