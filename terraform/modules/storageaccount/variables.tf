@@ -120,3 +120,18 @@ variable "access_tier" {
   type = string
   default = "Hot"
 }
+
+variable "identity_id" {
+  description = "The ID of the user assigned identity"
+  type        = string
+}
+
+variable "key_vault_id" {
+  description = "The ID of the key vault"
+  type        = string
+}
+
+variable "key_name" {
+  description = "The name of the key"
+  type        = string
+}
