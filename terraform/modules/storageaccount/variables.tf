@@ -120,3 +120,15 @@ variable "access_tier" {
   type = string
   default = "Hot"
 }
+
+variable "customer_managed_key" {
+  description = "The customer managed key for the storage account"
+  type        = any
+  default     = null
+}
+
+variable "identity_ids" {
+  description = "The list of user assigned identity ids"
+  type        = list(string)
+  default     = []
+}
