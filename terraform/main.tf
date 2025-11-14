@@ -82,6 +82,8 @@ module "storageaccount" {
     }
   ]
   tags = local.tags
+  customer_managed_key_enabled = true
+  key_vault_name               = "kv-${local.suffix}"
 }
 
 module "vmss" {
