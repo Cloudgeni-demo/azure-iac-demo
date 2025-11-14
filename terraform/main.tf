@@ -58,6 +58,9 @@ module "storageaccount" {
   is_hns_enabled            = true
   nfsv3_enabled             = true
   enable_lock               = true
+  public_network_access_enabled = false
+  subnet_id_private_endpoint = module.network.subnet_id
+  name_private_link_ids = [azurerm_private_dns_zone.dns_zone_blob.id]
   containers = [
     {
       name                  = "wordpress-content"
@@ -70,15 +73,6 @@ module "storageaccount" {
     {
       name                  = "wordpress-content-bkp-monthly"
       container_access_type = "private"
-    }
-  ]
-  network_rules = [
-    {
-      default_action = "Deny"
-      ip_rules       = [module.network.my_ip]
-      virtual_network_subnet_ids = [
-        module.network.subnet_id
-      ]
     }
   ]
   tags = local.tags
