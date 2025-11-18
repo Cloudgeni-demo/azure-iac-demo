@@ -1,3 +1,5 @@
+data "azurerm_client_config" "current" {}
+
 provider "azurerm" {
   features {
     resource_group {
@@ -45,11 +47,21 @@ module "network" {
 
 
 
+
+module "keyvault" {
+  source                  = "./modules/keyvault"
+  key_vault_name          = "kv-${local.suffix}"
+  location                = local.region
+  resource_group_name     = module.resource_group.rg_name
+  tenant_id               = data.azurerm_client_config.current.tenant_id
+  key_name                = "storage-encryption-key"
+}
+
 module "storageaccount" {
   source = "./modules/storageaccount"
 
   resource_group            = module.resource_group.rg_name
-  storage_account_name      = "sa${local.suffix}"
+  storage_account_name      = "samywplab"
   region                    = local.region
   account_tier              = "Standard"
   account_replication_type  = "LRS"
@@ -58,6 +70,8 @@ module "storageaccount" {
   is_hns_enabled            = true
   nfsv3_enabled             = true
   enable_lock               = true
+  key_vault_id              = module.keyvault.key_vault_id
+  key_name                  = module.keyvault.key_name
   containers = [
     {
       name                  = "wordpress-content"
@@ -166,6 +180,30 @@ module "azure-postgresql" {
       name  = "log_statement"
       value = "all"
     }
+  ]
+}
+
+resource "azurerm_key_vault_access_policy" "storage_account_access_policy" {
+  key_vault_id = module.keyvault.key_vault_id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = data.azurerm_storage_account.existing.identity[0].principal_id
+
+  key_permissions = [
+    "Get",
+    "UnwrapKey",
+    "WrapKey",
+  ]
+
+  depends_on = [
+    module.storageaccount
+  ]
+}
+
+data "azurerm_storage_account" "existing" {
+  name                = "samywplab"
+  resource_group_name = module.resource_group.rg_name
+  depends_on = [
+    module.storageaccount
   ]
 }
 
