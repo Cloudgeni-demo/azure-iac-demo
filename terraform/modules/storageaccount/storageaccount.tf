@@ -6,6 +6,7 @@ resource "azurerm_storage_account" "storage_account" {
   account_kind              = var.account_kind
   access_tier               = var.access_tier
   account_replication_type  = var.account_replication_type
+  allow_nested_items_to_be_public = var.allow_nested_items_to_be_public
   is_hns_enabled            = var.is_hns_enabled
   enable_https_traffic_only = var.enable_https_traffic_only
   public_network_access_enabled   = var.public_network_access_enabled 

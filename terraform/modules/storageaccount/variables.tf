@@ -35,6 +35,12 @@ variable "public_network_access_enabled" {
   description = "Allow public access to blobs inside the account"
   default     = true
 }
+
+variable "allow_nested_items_to_be_public" {
+  description = "Allow public access to blobs inside the account"
+  default     = false
+}
+
 variable "account_kind" {
   description = "Kind of account."
   default     = "Storage"
