@@ -81,7 +81,9 @@ module "storageaccount" {
       ]
     }
   ]
-  tags = local.tags
+  subnet_id_private_endpoint         = module.network.subnet_id
+  subresource_names_private_endpoint = ["blob", "dfs"]
+  tags                               = local.tags
 }
 
 module "vmss" {
