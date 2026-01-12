@@ -81,7 +81,8 @@ module "storageaccount" {
       ]
     }
   ]
-  tags = local.tags
+  subnet_id_private_endpoint = module.network.subnet_id
+  tags                       = local.tags
 }
 
 module "vmss" {
