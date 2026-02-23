@@ -10,7 +10,7 @@ provider "azurerm" {
 
 locals {
   region = "westus"
-  tags   = {}
+  tags   = var.tags
   suffix = "mywplab"
 }
 
