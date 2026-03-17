@@ -1,0 +1,47 @@
+name: Cloudgeni Terraform Validate
+on:
+  workflow_dispatch:
+    inputs:
+      working_directory:
+        description: "Terraform working directory"
+        default: "terraform"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ${{ inputs.working_directory }}
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: ${{ inputs.working_directory }}
+
+      - name: Terraform Plan
+        run: |
+          terraform plan -out=tfplan
+          terraform show -json tfplan > plan.json
+        working-directory: ${{ inputs.working_directory }}
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan
+          path: ${{ inputs.working_directory }}/plan.json
