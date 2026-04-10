@@ -120,3 +120,9 @@ variable "access_tier" {
   type = string
   default = "Hot"
 }
+
+variable "allow_blob_public_access" {
+  description = "Allow or disallow public access to all blobs or containers in the storage account"
+  type        = bool
+  default     = true
+}

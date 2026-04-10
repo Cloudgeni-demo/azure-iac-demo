@@ -169,3 +169,109 @@ module "azure-postgresql" {
   ]
 }
 
+# Container Apps Infrastructure - Imported Resources
+
+locals {
+  aca_tags = {
+    demo    = "cloud-import"
+    agent   = "codex"
+    created = "2026-04-10"
+    purpose = "aca-import"
+  }
+}
+
+import {
+  to = module.aca_resource_group.rg
+  id = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a/resourceGroups/rg-aca0410f516-northeurope"
+}
+
+module "aca_resource_group" {
+  source = "./modules/resource_group"
+  name   = "rg-aca0410f516-northeurope"
+  region = "northeurope"
+}
+
+import {
+  to = module.aca_network.vnet
+  id = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a/resourceGroups/rg-aca0410f516-northeurope/providers/Microsoft.Network/virtualNetworks/vnet-aca0410f516"
+}
+
+import {
+  to = module.aca_network.subnet
+  id = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a/resourceGroups/rg-aca0410f516-northeurope/providers/Microsoft.Network/virtualNetworks/vnet-aca0410f516/subnets/snet-aca-infra"
+}
+
+module "aca_network" {
+  source                  = "./modules/network"
+  name                    = "aca0410f516"
+  resource_group          = module.aca_resource_group.rg_name
+  region                  = "northeurope"
+  vnet_address_space      = ["10.42.0.0/16"]
+  subnet_name             = "snet-aca-infra"
+  subnet_address_prefixes = ["10.42.0.0/23"]
+  service_endpoints       = []
+  subnet_delegations = [{
+    name         = "0"
+    service_name = "Microsoft.App/environments"
+    actions      = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
+  }]
+  security_rules = []
+}
+
+import {
+  to = module.aca_storage.storage_account
+  id = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a/resourceGroups/rg-aca0410f516-northeurope/providers/Microsoft.Storage/storageAccounts/saaca0410f516nort"
+}
+
+module "aca_storage" {
+  source                    = "./modules/storageaccount"
+  resource_group            = module.aca_resource_group.rg_name
+  storage_account_name      = "saaca0410f516nort"
+  region                    = "northeurope"
+  account_tier              = "Standard"
+  account_replication_type  = "LRS"
+  account_kind              = "StorageV2"
+  access_tier               = "Hot"
+  enable_https_traffic_only = true
+  allow_blob_public_access  = false
+  min_tls_version           = "TLS1_2"
+  is_hns_enabled            = false
+  nfsv3_enabled             = false
+  enable_lock               = false
+  containers                = []
+  network_rules = [
+    {
+      default_action             = "Allow"
+      ip_rules                   = []
+      virtual_network_subnet_ids = []
+    }
+  ]
+  tags = local.aca_tags
+}
+
+import {
+  to = module.container_apps.managed_environment
+  id = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a/resourceGroups/rg-aca0410f516-northeurope/providers/Microsoft.App/managedEnvironments/cae-aca0410f516"
+}
+
+import {
+  to = module.container_apps.container_app
+  id = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a/resourceGroups/rg-aca0410f516-northeurope/providers/Microsoft.App/containerApps/app-aca0410f516"
+}
+
+import {
+  to = module.container_apps.container_app_job
+  id = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a/resourceGroups/rg-aca0410f516-northeurope/providers/Microsoft.App/jobs/job-aca0410f516"
+}
+
+module "container_apps" {
+  source                   = "./modules/container_apps"
+  resource_group_name      = module.aca_resource_group.rg_name
+  location                 = "North Europe"
+  managed_environment_name = "cae-aca0410f516"
+  infrastructure_subnet_id = module.aca_network.subnet_id
+  container_app_name       = "app-aca0410f516"
+  container_app_job_name   = "job-aca0410f516"
+  tags                     = local.aca_tags
+}
+
