@@ -1,0 +1,53 @@
+name: Cloudgeni Terraform Plan
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment name'
+        required: false
+        default: 'dev'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ~1.5.0
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: terraform
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+
+      - name: Terraform Plan
+        run: |
+          terraform plan -out=tfplan
+          terraform show -json tfplan 2>/dev/null | sed -n '/^{/,$p' > plan.json
+        working-directory: terraform
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+          TF_VAR_database_postgresql_admin_password: ${{ secrets.TF_VAR_DATABASE_POSTGRESQL_ADMIN_PASSWORD }}
+
+      - name: Upload Plan Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan
+          path: terraform/plan.json
+          retention-days: 30
