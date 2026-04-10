@@ -31,7 +31,35 @@ variable "service_endpoints" {
     description = "Service endpoints for the subnet"
     type = list
     default = ["Microsoft.Storage"]
-  
+
+}
+
+variable "vnet_address_space" {
+  description = "Address space for the virtual network"
+  type        = list(string)
+  default     = ["10.0.0.0/16"]
+}
+
+variable "subnet_address_prefixes" {
+  description = "Address prefixes for the subnet"
+  type        = list(string)
+  default     = ["10.0.1.0/24"]
+}
+
+variable "subnet_delegations" {
+  description = "Subnet delegations"
+  type = list(object({
+    name         = string
+    service_name = string
+    actions      = list(string)
+  }))
+  default = []
+}
+
+variable "subnet_name" {
+  description = "Override subnet name (defaults to snt-{name})"
+  type        = string
+  default     = null
 }
 
 variable "private_dns_name" {

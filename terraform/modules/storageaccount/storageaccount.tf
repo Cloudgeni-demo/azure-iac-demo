@@ -1,17 +1,18 @@
 resource "azurerm_storage_account" "storage_account" {
-  name                      = var.storage_account_name
-  resource_group_name       = var.resource_group
-  location                  = var.region
-  account_tier              = var.account_tier
-  account_kind              = var.account_kind
-  access_tier               = var.access_tier
-  account_replication_type  = var.account_replication_type
-  is_hns_enabled            = var.is_hns_enabled
-  enable_https_traffic_only = var.enable_https_traffic_only
-  public_network_access_enabled   = var.public_network_access_enabled 
-  nfsv3_enabled             = var.nfsv3_enabled
-  min_tls_version           = var.min_tls_version
-  tags                      = var.tags
+  name                          = var.storage_account_name
+  resource_group_name           = var.resource_group
+  location                      = var.region
+  account_tier                  = var.account_tier
+  account_kind                  = var.account_kind
+  access_tier                   = var.access_tier
+  account_replication_type      = var.account_replication_type
+  is_hns_enabled                = var.is_hns_enabled
+  enable_https_traffic_only     = var.enable_https_traffic_only
+  public_network_access_enabled = var.public_network_access_enabled
+  allow_nested_items_to_be_public = var.allow_blob_public_access
+  nfsv3_enabled                 = var.nfsv3_enabled
+  min_tls_version               = var.min_tls_version
+  tags                          = var.tags
 
   dynamic "network_rules" {
     #check if network_rules has any rule to set below block
