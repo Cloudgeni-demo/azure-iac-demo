@@ -7,9 +7,6 @@ on:
         description: 'Terraform working directory'
         required: false
         default: 'terraform'
-  push:
-    branches:
-      - feature/setup-iac-pipelines
 
 permissions:
   id-token: write
