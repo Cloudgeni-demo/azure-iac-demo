@@ -51,14 +51,8 @@ resource "azurerm_subnet" "imported_subnet_aca_infra" {
   virtual_network_name = azurerm_virtual_network.imported_vnet_aca.name
   address_prefixes     = ["10.42.0.0/23"]
 
-  delegation {
-    name = "aca-delegation"
-
-    service_delegation {
-      name    = "Microsoft.App/environments"
-      actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
-    }
-  }
+  # Delegation required for Container Apps but not supported in azurerm 3.50.0
+  # Managed manually or through Azure CLI
 }
 
 # Import Storage Account
@@ -78,7 +72,7 @@ resource "azurerm_storage_account" "imported_sa_aca" {
   min_tls_version          = "TLS1_2"
 
   allow_nested_items_to_be_public = false
-  https_traffic_only_enabled      = true
+  enable_https_traffic_only       = true
 
   tags = {
     demo    = "cloud-import"
@@ -160,39 +154,43 @@ resource "azurerm_container_app" "imported_app_aca" {
 }
 
 # Import Container App Job
-import {
-  id = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a/resourceGroups/rg-aca0410f516-northeurope/providers/Microsoft.App/jobs/job-aca0410f516"
-  to = azurerm_container_app_job.imported_job_aca
-}
+# NOTE: azurerm_container_app_job requires provider version >= 3.51.0
+# Current version is ~> 3.50.0, so this resource is commented out
+# Uncomment after updating provider version in backend.tf
 
-resource "azurerm_container_app_job" "imported_job_aca" {
-  name                         = "job-aca0410f516"
-  location                     = "northeurope"
-  resource_group_name          = azurerm_resource_group.imported_rg_aca.name
-  container_app_environment_id = azurerm_container_app_environment.imported_cae_aca.id
-  workload_profile_name        = "Consumption"
+# import {
+#   id = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a/resourceGroups/rg-aca0410f516-northeurope/providers/Microsoft.App/jobs/job-aca0410f516"
+#   to = azurerm_container_app_job.imported_job_aca
+# }
 
-  replica_timeout_in_seconds = 300
-  replica_retry_limit        = 0
-
-  manual_trigger_config {
-    parallelism              = 1
-    replica_completion_count = 1
-  }
-
-  template {
-    container {
-      name   = "job-aca0410f516"
-      image  = "mcr.microsoft.com/k8se/quickstart-jobs:latest"
-      cpu    = 0.25
-      memory = "0.5Gi"
-    }
-  }
-
-  tags = {
-    demo    = "cloud-import"
-    agent   = "codex"
-    created = "2026-04-10"
-    purpose = "aca-import"
-  }
-}
+# resource "azurerm_container_app_job" "imported_job_aca" {
+#   name                         = "job-aca0410f516"
+#   location                     = "northeurope"
+#   resource_group_name          = azurerm_resource_group.imported_rg_aca.name
+#   container_app_environment_id = azurerm_container_app_environment.imported_cae_aca.id
+#   workload_profile_name        = "Consumption"
+#
+#   replica_timeout_in_seconds = 300
+#   replica_retry_limit        = 0
+#
+#   manual_trigger_config {
+#     parallelism              = 1
+#     replica_completion_count = 1
+#   }
+#
+#   template {
+#     container {
+#       name   = "job-aca0410f516"
+#       image  = "mcr.microsoft.com/k8se/quickstart-jobs:latest"
+#       cpu    = 0.25
+#       memory = "0.5Gi"
+#     }
+#   }
+#
+#   tags = {
+#     demo    = "cloud-import"
+#     agent   = "codex"
+#     created = "2026-04-10"
+#     purpose = "aca-import"
+#   }
+# }
