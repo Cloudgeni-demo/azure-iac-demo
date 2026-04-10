@@ -7,9 +7,6 @@ on:
         description: 'Environment name'
         required: false
         default: 'dev'
-  push:
-    branches:
-      - feature/setup-iac-pipelines
 
 permissions:
   id-token: write
