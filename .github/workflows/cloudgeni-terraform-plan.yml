@@ -1,19 +1,19 @@
-name: Cloudgeni Terraform Validate
+name: Cloudgeni Terraform Plan
 
 on:
   workflow_dispatch:
     inputs:
-      working_directory:
-        description: 'Terraform working directory'
+      environment:
+        description: 'Environment name'
         required: false
-        default: 'terraform'
+        default: 'dev'
 
 permissions:
   id-token: write
   contents: read
 
 jobs:
-  validate:
+  plan:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -39,22 +39,18 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-        working-directory: ${{ inputs.working_directory }}
+        working-directory: terraform
         env:
           ARM_CLIENT_ID: ${{ steps.azure_creds.outputs.CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ steps.azure_creds.outputs.CLIENT_SECRET }}
           ARM_SUBSCRIPTION_ID: ${{ steps.azure_creds.outputs.SUBSCRIPTION_ID }}
           ARM_TENANT_ID: ${{ steps.azure_creds.outputs.TENANT_ID }}
 
-      - name: Terraform Validate
-        run: terraform validate
-        working-directory: ${{ inputs.working_directory }}
-
       - name: Terraform Plan
         run: |
           terraform plan -out=tfplan
           terraform show -json tfplan 2>/dev/null | sed -n '/^{/,$p' > plan.json
-        working-directory: ${{ inputs.working_directory }}
+        working-directory: terraform
         env:
           ARM_CLIENT_ID: ${{ steps.azure_creds.outputs.CLIENT_ID }}
           ARM_CLIENT_SECRET: ${{ steps.azure_creds.outputs.CLIENT_SECRET }}
@@ -65,5 +61,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: terraform-plan
-          path: ${{ inputs.working_directory }}/plan.json
+          path: terraform/plan.json
           retention-days: 30
