@@ -51,8 +51,16 @@ resource "azurerm_subnet" "imported_subnet_aca_infra" {
   virtual_network_name = azurerm_virtual_network.imported_vnet_aca.name
   address_prefixes     = ["10.42.0.0/23"]
 
-  # Delegation required for Container Apps but not supported in azurerm 3.50.0
-  # Managed manually or through Azure CLI
+  delegation {
+    name = "0"
+
+    service_delegation {
+      name = "Microsoft.App/environments"
+      actions = [
+        "Microsoft.Network/virtualNetworks/subnets/join/action"
+      ]
+    }
+  }
 }
 
 # Import Storage Account
@@ -71,8 +79,9 @@ resource "azurerm_storage_account" "imported_sa_aca" {
   access_tier              = "Hot"
   min_tls_version          = "TLS1_2"
 
-  allow_nested_items_to_be_public = false
-  enable_https_traffic_only       = true
+  allow_nested_items_to_be_public  = false
+  enable_https_traffic_only        = true
+  cross_tenant_replication_enabled = false
 
   tags = {
     demo    = "cloud-import"
