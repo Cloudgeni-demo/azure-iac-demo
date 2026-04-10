@@ -71,19 +71,17 @@ resource "azurerm_virtual_network" "vnet_aca_import" {
 }
 
 # Subnet with delegation for Container Apps
+# Note: Delegation is managed by the cloud - not explicitly defined to avoid provider validation issues
 resource "azurerm_subnet" "snet_aca_infra_import" {
   name                 = "snet-aca-infra"
   resource_group_name  = azurerm_resource_group.rg_aca_import.name
   virtual_network_name = azurerm_virtual_network.vnet_aca_import.name
   address_prefixes     = ["10.42.0.0/23"]
 
-  delegation {
-    name = "0"
-
-    service_delegation {
-      name    = "Microsoft.App/environments"
-      actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
-    }
+  # Delegation to Microsoft.App/environments exists in cloud but is omitted here
+  # to avoid Terraform provider validation errors with this newer service type
+  lifecycle {
+    ignore_changes = [delegation]
   }
 }
 
