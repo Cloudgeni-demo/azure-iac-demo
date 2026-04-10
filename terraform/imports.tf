@@ -83,71 +83,77 @@ resource "azurerm_storage_account" "imported_sa_aca" {
 }
 
 # Import Container Apps Managed Environment
-import {
-  id = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a/resourceGroups/rg-aca0410f516-northeurope/providers/Microsoft.App/managedEnvironments/cae-aca0410f516"
-  to = azurerm_container_app_environment.imported_cae_aca
-}
+# NOTE: azurerm_container_app_environment has limited support in 3.50.0
+# - Requires log_analytics_workspace_id but actual resource doesn't have one
+# - Missing zone_redundant_enabled and workload_profile support
+# Uncomment after updating provider version to >= 3.70.0
 
-resource "azurerm_container_app_environment" "imported_cae_aca" {
-  name                           = "cae-aca0410f516"
-  location                       = "northeurope"
-  resource_group_name            = azurerm_resource_group.imported_rg_aca.name
-  infrastructure_subnet_id       = azurerm_subnet.imported_subnet_aca_infra.id
-  internal_load_balancer_enabled = false
+# import {
+#   id = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a/resourceGroups/rg-aca0410f516-northeurope/providers/Microsoft.App/managedEnvironments/cae-aca0410f516"
+#   to = azurerm_container_app_environment.imported_cae_aca
+# }
 
-  # zone_redundant_enabled and workload_profile not supported in azurerm 3.50.0
-
-  tags = {
-    demo    = "cloud-import"
-    agent   = "codex"
-    created = "2026-04-10"
-    purpose = "aca-import"
-  }
-}
+# resource "azurerm_container_app_environment" "imported_cae_aca" {
+#   name                           = "cae-aca0410f516"
+#   location                       = "northeurope"
+#   resource_group_name            = azurerm_resource_group.imported_rg_aca.name
+#   infrastructure_subnet_id       = azurerm_subnet.imported_subnet_aca_infra.id
+#   internal_load_balancer_enabled = false
+#
+#   tags = {
+#     demo    = "cloud-import"
+#     agent   = "codex"
+#     created = "2026-04-10"
+#     purpose = "aca-import"
+#   }
+# }
 
 # Import Container App
-import {
-  id = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a/resourceGroups/rg-aca0410f516-northeurope/providers/Microsoft.App/containerApps/app-aca0410f516"
-  to = azurerm_container_app.imported_app_aca
-}
+# NOTE: Depends on azurerm_container_app_environment which is commented out
+# Uncomment after Container App Environment is successfully imported
 
-resource "azurerm_container_app" "imported_app_aca" {
-  name                         = "app-aca0410f516"
-  container_app_environment_id = azurerm_container_app_environment.imported_cae_aca.id
-  resource_group_name          = azurerm_resource_group.imported_rg_aca.name
-  revision_mode                = "Single"
-  workload_profile_name        = "Consumption"
+# import {
+#   id = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a/resourceGroups/rg-aca0410f516-northeurope/providers/Microsoft.App/containerApps/app-aca0410f516"
+#   to = azurerm_container_app.imported_app_aca
+# }
 
-  template {
-    min_replicas = 0
-    max_replicas = 1
-
-    container {
-      name   = "app-aca0410f516"
-      image  = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
-      cpu    = 0.25
-      memory = "0.5Gi"
-    }
-  }
-
-  ingress {
-    external_enabled = true
-    target_port      = 80
-    transport        = "auto"
-
-    traffic_weight {
-      latest_revision = true
-      percentage      = 100
-    }
-  }
-
-  tags = {
-    demo    = "cloud-import"
-    agent   = "codex"
-    created = "2026-04-10"
-    purpose = "aca-import"
-  }
-}
+# resource "azurerm_container_app" "imported_app_aca" {
+#   name                         = "app-aca0410f516"
+#   container_app_environment_id = azurerm_container_app_environment.imported_cae_aca.id
+#   resource_group_name          = azurerm_resource_group.imported_rg_aca.name
+#   revision_mode                = "Single"
+#   workload_profile_name        = "Consumption"
+#
+#   template {
+#     min_replicas = 0
+#     max_replicas = 1
+#
+#     container {
+#       name   = "app-aca0410f516"
+#       image  = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
+#       cpu    = 0.25
+#       memory = "0.5Gi"
+#     }
+#   }
+#
+#   ingress {
+#     external_enabled = true
+#     target_port      = 80
+#     transport        = "auto"
+#
+#     traffic_weight {
+#       latest_revision = true
+#       percentage      = 100
+#     }
+#   }
+#
+#   tags = {
+#     demo    = "cloud-import"
+#     agent   = "codex"
+#     created = "2026-04-10"
+#     purpose = "aca-import"
+#   }
+# }
 
 # Import Container App Job
 # NOTE: azurerm_container_app_job requires provider version >= 3.51.0
