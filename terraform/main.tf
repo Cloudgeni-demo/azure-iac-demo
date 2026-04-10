@@ -1,31 +1,14 @@
-provider "azurerm" {
-  features {
-    resource_group {
-      prevent_deletion_if_contains_resources = false
-    }
-  }
-  skip_provider_registration = false
-}
-
-
-locals {
-  region = "westus"
-  tags   = {}
-  suffix = "mywplab"
-}
-
 module "resource_group" {
   source = "./modules/resource_group"
-  name   = "rgp-mywplab"
-  region = local.region
-
+  name   = var.resource_group_name
+  region = var.region
 }
 
 module "network" {
   source         = "./modules/network"
-  name           = local.suffix
+  name           = var.suffix
   resource_group = module.resource_group.rg_name
-  region         = local.region
+  region         = var.region
   security_rules = [
     {
       name                       = "AllowHttp"
@@ -49,15 +32,15 @@ module "storageaccount" {
   source = "./modules/storageaccount"
 
   resource_group            = module.resource_group.rg_name
-  storage_account_name      = "sa${local.suffix}"
-  region                    = local.region
-  account_tier              = "Standard"
-  account_replication_type  = "LRS"
+  storage_account_name      = "sa${var.suffix}"
+  region                    = var.region
+  account_tier              = var.storage_account_tier
+  account_replication_type  = var.storage_replication_type
   account_kind              = "StorageV2"
   enable_https_traffic_only = false #Unsupported with NFS
   is_hns_enabled            = true
   nfsv3_enabled             = true
-  enable_lock               = true
+  enable_lock               = var.storage_enable_lock
   containers = [
     {
       name                  = "wordpress-content"
@@ -81,7 +64,7 @@ module "storageaccount" {
       ]
     }
   ]
-  tags = local.tags
+  tags = var.tags
 }
 
 module "vmss" {
@@ -89,21 +72,21 @@ module "vmss" {
   depends_on = [
     module.storageaccount
   ]
-  vmss_name                 = "vmss-${local.suffix}"
-  location                  = local.region
+  vmss_name                 = "vmss-${var.suffix}"
+  location                  = var.region
   resource_group_name       = module.resource_group.rg_name
-  sku                       = "Standard_B2s"
-  zones                     = []
+  sku                       = var.vmss_sku
+  zones                     = var.vmss_zones
   upgrade_mode              = "Rolling"
   automatic_instance_repair = true
   custom_data               = filebase64("${path.root}/script.tpl")
   subnet_id                 = module.network.subnet_id
   network_security_group_id = module.network.nsg_id
-  ssh_public_key            = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCvQRluXF3TIK00twfnhL1dIS263+JUKXEFh6jV1xuVUFqZMKKyCEoxg+7B1juiUBLETRb1CWcoLMPYZDjyyEheC6LM5rAH2PIBYxujzNx6b82h+NEMEI5mF45HE+NPsnDdOwBTMYFYt0jGOG9/Z5Eqkv0EL5kBX75cvAbATBIVfA8Zocny9mIP/tAFjNQ8hqc+rYnjfrH8ex+p8fREofPARNC7VTPICM7+/ia2h6H/XqFvSxJm7x3pMKbYsbjjduuUIpGK5GzDBKxz+NOZCYHIAwJk1VYa/K/2ZVzqjpTQQapnJ+9GmJHuyuq4qYB/ACPphqInZRjvwG74qEVv9GzvTDH7RmZHj7f2v/XrQ6iA7iB+eJesm5OlJLn29YLwEsOWzgmPIIzkvvF9nviCPxK2zjx0nnJ9/wOEJkxSsT97BhUWWZNnyjgIRMyWQxhPvyQVv1OAeXqJdrLlRO1uC800KSOL/+LHDA5KFRq+0snk5L+P4/sssb9wnhPPBRoi2Is="
-  autoscaling_enabled       = true
-  capacity_default          = 3
-  capacity_minimum          = 3
-  capacity_maximum          = 4
+  ssh_public_key            = var.vmss_ssh_public_key
+  autoscaling_enabled       = var.autoscaling_enabled
+  capacity_default          = var.autoscaling_capacity_default
+  capacity_minimum          = var.autoscaling_capacity_minimum
+  capacity_maximum          = var.autoscaling_capacity_maximum
 
   metrics_trigger = [
     {
@@ -136,26 +119,26 @@ module "vmss" {
     }
   ]
 
-  tags = local.tags
+  tags = var.tags
 }
 
 
 module "azure-postgresql" {
   source                             = "./modules/postgresql"
   resource_group                     = module.resource_group.rg_name
-  region                             = local.region
-  resource_postgresql_name           = "postgresqlf-${local.suffix}"
-  database_name                      = "wordpress"
-  database_sku                       = "GP_Standard_D2s_v3"
-  database_postgresql_version        = "13"
-  storage_mb                         = 32768
-  backup_retention_days              = 20
-  geo_redundant_backup               = false
-  high_availability_enabled          = false
+  region                             = var.region
+  resource_postgresql_name           = "postgresqlf-${var.suffix}"
+  database_name                      = var.postgresql_database_name
+  database_sku                       = var.postgresql_sku
+  database_postgresql_version        = var.postgresql_version
+  storage_mb                         = var.postgresql_storage_mb
+  backup_retention_days              = var.postgresql_backup_retention_days
+  geo_redundant_backup               = var.postgresql_geo_redundant_backup
+  high_availability_enabled          = var.postgresql_high_availability
   postgresql_zone                    = ""
-  database_postgresql_admin_username = "adminsiteswordpress"
+  database_postgresql_admin_username = var.database_postgresql_admin_username
   database_postgresql_admin_password = var.database_postgresql_admin_password
-  tags                               = local.tags
+  tags                               = var.tags
   vm_nsg_whitelist_ips_ports = [{
     "name"      = "vmss_ip"
     "source_ip" = module.vmss.lb_ip
