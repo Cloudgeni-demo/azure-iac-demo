@@ -24,14 +24,22 @@ jobs:
         with:
           terraform_version: ~1.5.0
 
+      - name: Extract Azure Credentials
+        id: azure_creds
+        run: |
+          echo "CLIENT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientId')" >> $GITHUB_OUTPUT
+          echo "CLIENT_SECRET=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientSecret')" >> $GITHUB_OUTPUT
+          echo "SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.subscriptionId')" >> $GITHUB_OUTPUT
+          echo "TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.tenantId')" >> $GITHUB_OUTPUT
+
       - name: Terraform Init
         run: terraform init
         working-directory: ${{ inputs.working_directory }}
         env:
-          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+          ARM_CLIENT_ID: ${{ steps.azure_creds.outputs.CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ steps.azure_creds.outputs.CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ steps.azure_creds.outputs.SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ steps.azure_creds.outputs.TENANT_ID }}
 
       - name: Terraform Validate
         run: terraform validate
@@ -43,11 +51,10 @@ jobs:
           terraform show -json tfplan 2>/dev/null | sed -n '/^{/,$p' > plan.json
         working-directory: ${{ inputs.working_directory }}
         env:
-          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-          TF_VAR_database_postgresql_admin_password: ${{ secrets.TF_VAR_DATABASE_POSTGRESQL_ADMIN_PASSWORD }}
+          ARM_CLIENT_ID: ${{ steps.azure_creds.outputs.CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ steps.azure_creds.outputs.CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ steps.azure_creds.outputs.SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ steps.azure_creds.outputs.TENANT_ID }}
 
       - name: Upload Plan Artifact
         uses: actions/upload-artifact@v4
