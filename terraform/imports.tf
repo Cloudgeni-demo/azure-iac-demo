@@ -94,12 +94,8 @@ resource "azurerm_container_app_environment" "imported_cae_aca" {
   resource_group_name            = azurerm_resource_group.imported_rg_aca.name
   infrastructure_subnet_id       = azurerm_subnet.imported_subnet_aca_infra.id
   internal_load_balancer_enabled = false
-  zone_redundant_enabled         = false
 
-  workload_profile {
-    name                  = "Consumption"
-    workload_profile_type = "Consumption"
-  }
+  # zone_redundant_enabled and workload_profile not supported in azurerm 3.50.0
 
   tags = {
     demo    = "cloud-import"
