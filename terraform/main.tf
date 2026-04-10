@@ -84,6 +84,33 @@ module "storageaccount" {
   tags = local.tags
 }
 
+module "storageaccount_general" {
+  source = "./modules/storageaccount"
+
+  resource_group            = module.resource_group.rg_name
+  storage_account_name      = "sagen${local.suffix}"
+  region                    = local.region
+  account_tier              = "Standard"
+  account_replication_type  = "LRS"
+  account_kind              = "StorageV2"
+  enable_https_traffic_only = true
+  is_hns_enabled            = false
+  nfsv3_enabled             = false
+  enable_lock               = false
+  containers = [
+    {
+      name                  = "data"
+      container_access_type = "private"
+    },
+    {
+      name                  = "backups"
+      container_access_type = "private"
+    }
+  ]
+  network_rules = []
+  tags          = local.tags
+}
+
 module "vmss" {
   source = "./modules/vmss"
   depends_on = [
