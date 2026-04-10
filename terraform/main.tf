@@ -259,10 +259,7 @@ import {
   id = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a/resourceGroups/rg-aca0410f516-northeurope/providers/Microsoft.App/containerApps/app-aca0410f516"
 }
 
-import {
-  to = module.container_apps.azurerm_container_app_job.container_app_job
-  id = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a/resourceGroups/rg-aca0410f516-northeurope/providers/Microsoft.App/jobs/job-aca0410f516"
-}
+# Note: Container App Job cannot be imported - azurerm provider 3.50.0 does not support azurerm_container_app_job resource type
 
 module "container_apps" {
   source                   = "./modules/container_apps"
@@ -271,7 +268,6 @@ module "container_apps" {
   managed_environment_name = "cae-aca0410f516"
   infrastructure_subnet_id = module.aca_network.subnet_id
   container_app_name       = "app-aca0410f516"
-  container_app_job_name   = "job-aca0410f516"
   tags                     = local.aca_tags
 }
 

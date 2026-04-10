@@ -8,11 +8,6 @@ output "container_app_id" {
   value       = azurerm_container_app.container_app.id
 }
 
-output "container_app_job_id" {
-  description = "ID of the container app job"
-  value       = azurerm_container_app_job.container_app_job.id
-}
-
 output "default_domain" {
   description = "Default domain of the managed environment"
   value       = azurerm_container_app_environment.managed_environment.default_domain

@@ -23,11 +23,6 @@ variable "container_app_name" {
   type        = string
 }
 
-variable "container_app_job_name" {
-  description = "Name of the container app job"
-  type        = string
-}
-
 variable "tags" {
   description = "Tags to apply to resources"
   type        = map(string)
