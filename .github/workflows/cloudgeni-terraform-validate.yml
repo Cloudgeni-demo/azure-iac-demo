@@ -1,0 +1,69 @@
+name: Cloudgeni Terraform Validate
+
+on:
+  workflow_dispatch:
+    inputs:
+      working_directory:
+        description: 'Terraform working directory'
+        required: false
+        default: 'terraform'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ~1.5.0
+
+      - name: Extract Azure Credentials
+        id: azure_creds
+        run: |
+          echo "CLIENT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientId')" >> $GITHUB_OUTPUT
+          echo "CLIENT_SECRET=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientSecret')" >> $GITHUB_OUTPUT
+          echo "SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.subscriptionId')" >> $GITHUB_OUTPUT
+          echo "TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.tenantId')" >> $GITHUB_OUTPUT
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ${{ inputs.working_directory }}
+        env:
+          ARM_CLIENT_ID: ${{ steps.azure_creds.outputs.CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ steps.azure_creds.outputs.CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ steps.azure_creds.outputs.SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ steps.azure_creds.outputs.TENANT_ID }}
+
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: ${{ inputs.working_directory }}
+
+      - name: Terraform Plan
+        run: |
+          terraform plan -out=tfplan
+          terraform show -json tfplan 2>/dev/null | sed -n '/^{/,$p' > plan.json
+        working-directory: ${{ inputs.working_directory }}
+        env:
+          ARM_CLIENT_ID: ${{ steps.azure_creds.outputs.CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ steps.azure_creds.outputs.CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ steps.azure_creds.outputs.SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ steps.azure_creds.outputs.TENANT_ID }}
+
+      - name: Upload Plan Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan
+          path: ${{ inputs.working_directory }}/plan.json
+          retention-days: 30
