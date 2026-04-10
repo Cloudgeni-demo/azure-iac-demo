@@ -51,15 +51,10 @@ resource "azurerm_subnet" "imported_subnet_aca_infra" {
   virtual_network_name = azurerm_virtual_network.imported_vnet_aca.name
   address_prefixes     = ["10.42.0.0/23"]
 
-  delegation {
-    name = "0"
-
-    service_delegation {
-      name = "Microsoft.App/environments"
-      actions = [
-        "Microsoft.Network/virtualNetworks/subnets/join/action"
-      ]
-    }
+  # Delegation for Microsoft.App/environments not supported in azurerm 3.50.0
+  # Using lifecycle block to ignore delegation changes until provider update
+  lifecycle {
+    ignore_changes = [delegation]
   }
 }
 
