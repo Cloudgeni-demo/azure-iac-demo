@@ -181,7 +181,7 @@ locals {
 }
 
 import {
-  to = module.aca_resource_group.rg
+  to = module.aca_resource_group.azurerm_resource_group.rg
   id = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a/resourceGroups/rg-aca0410f516-northeurope"
 }
 
@@ -192,12 +192,12 @@ module "aca_resource_group" {
 }
 
 import {
-  to = module.aca_network.vnet
+  to = module.aca_network.azurerm_virtual_network.vnet
   id = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a/resourceGroups/rg-aca0410f516-northeurope/providers/Microsoft.Network/virtualNetworks/vnet-aca0410f516"
 }
 
 import {
-  to = module.aca_network.subnet
+  to = module.aca_network.azurerm_subnet.subnet
   id = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a/resourceGroups/rg-aca0410f516-northeurope/providers/Microsoft.Network/virtualNetworks/vnet-aca0410f516/subnets/snet-aca-infra"
 }
 
@@ -219,7 +219,7 @@ module "aca_network" {
 }
 
 import {
-  to = module.aca_storage.storage_account
+  to = module.aca_storage.azurerm_storage_account.storage_account
   id = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a/resourceGroups/rg-aca0410f516-northeurope/providers/Microsoft.Storage/storageAccounts/saaca0410f516nort"
 }
 
@@ -250,17 +250,17 @@ module "aca_storage" {
 }
 
 import {
-  to = module.container_apps.managed_environment
+  to = module.container_apps.azurerm_container_app_environment.managed_environment
   id = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a/resourceGroups/rg-aca0410f516-northeurope/providers/Microsoft.App/managedEnvironments/cae-aca0410f516"
 }
 
 import {
-  to = module.container_apps.container_app
+  to = module.container_apps.azurerm_container_app.container_app
   id = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a/resourceGroups/rg-aca0410f516-northeurope/providers/Microsoft.App/containerApps/app-aca0410f516"
 }
 
 import {
-  to = module.container_apps.container_app_job
+  to = module.container_apps.azurerm_container_app_job.container_app_job
   id = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a/resourceGroups/rg-aca0410f516-northeurope/providers/Microsoft.App/jobs/job-aca0410f516"
 }
 
