@@ -1,4 +1,6 @@
 # Import Azure Container Apps resources
+# NOTE: Provider version 3.50.0 has limited Container Apps support
+# Container App Environment, Container App, and Container App Job resources require provider >= 3.51.0
 
 # Resource Group
 module "rg_aca" {
@@ -55,16 +57,16 @@ import {
 
 # Storage Account
 module "storage_aca" {
-  source                    = "./modules/storageaccount"
-  resource_group            = module.rg_aca.rg_name
-  storage_account_name      = "saaca0410f516nort"
-  region                    = "northeurope"
-  account_tier              = "Standard"
-  account_replication_type  = "LRS"
-  account_kind              = "StorageV2"
-  access_tier               = "Hot"
-  enable_https_traffic_only = true
-  min_tls_version           = "TLS1_2"
+  source                        = "./modules/storageaccount"
+  resource_group                = module.rg_aca.rg_name
+  storage_account_name          = "saaca0410f516nort"
+  region                        = "northeurope"
+  account_tier                  = "Standard"
+  account_replication_type      = "LRS"
+  account_kind                  = "StorageV2"
+  access_tier                   = "Hot"
+  enable_https_traffic_only     = true
+  min_tls_version               = "TLS1_2"
   public_network_access_enabled = false
   tags = {
     demo    = "cloud-import"
@@ -79,108 +81,17 @@ import {
   id = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a/resourceGroups/rg-aca0410f516-northeurope/providers/Microsoft.Storage/storageAccounts/saaca0410f516nort"
 }
 
-# Container Apps Managed Environment
-resource "azurerm_container_app_environment" "cae_aca" {
-  name                       = "cae-aca0410f516"
-  location                   = "northeurope"
-  resource_group_name        = module.rg_aca.rg_name
-  infrastructure_subnet_id   = azurerm_subnet.snet_aca_infra.id
-  internal_load_balancer_enabled = false
-  zone_redundant_enabled     = false
-
-  tags = {
-    demo    = "cloud-import"
-    agent   = "codex"
-    created = "2026-04-10"
-    purpose = "aca-import"
-  }
-}
-
-import {
-  to = azurerm_container_app_environment.cae_aca
-  id = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a/resourceGroups/rg-aca0410f516-northeurope/providers/Microsoft.App/managedEnvironments/cae-aca0410f516"
-}
-
-# Container App
-resource "azurerm_container_app" "app_aca" {
-  name                         = "app-aca0410f516"
-  container_app_environment_id = azurerm_container_app_environment.cae_aca.id
-  resource_group_name          = module.rg_aca.rg_name
-  revision_mode                = "Single"
-
-  template {
-    min_replicas = 0
-    max_replicas = 1
-
-    container {
-      name   = "app-aca0410f516"
-      image  = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
-      cpu    = 0.25
-      memory = "0.5Gi"
-    }
-  }
-
-  ingress {
-    external_enabled = true
-    target_port      = 80
-    transport        = "auto"
-
-    traffic_weight {
-      latest_revision = true
-      percentage      = 100
-    }
-  }
-
-  tags = {
-    demo    = "cloud-import"
-    agent   = "codex"
-    created = "2026-04-10"
-    purpose = "aca-import"
-  }
-}
-
-import {
-  to = azurerm_container_app.app_aca
-  id = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a/resourceGroups/rg-aca0410f516-northeurope/providers/Microsoft.App/containerApps/app-aca0410f516"
-}
-
-# Container App Job
-# NOTE: azurerm_container_app_job requires provider version >= 3.51.0
-# Current provider version is 3.50.0, so this resource is commented out
-# To import this resource, upgrade the provider version in backend.tf
-
-# resource "azurerm_container_app_job" "job_aca" {
-#   name                         = "job-aca0410f516"
-#   location                     = "northeurope"
-#   resource_group_name          = module.rg_aca.rg_name
-#   container_app_environment_id = azurerm_container_app_environment.cae_aca.id
+# ============================================================================
+# Container Apps resources commented out due to provider version constraints
+# ============================================================================
+# The following resources require azurerm provider version >= 3.51.0:
+# - Microsoft.App/managedEnvironments (cae-aca0410f516)
+# - Microsoft.App/containerApps (app-aca0410f516)
+# - Microsoft.App/jobs (job-aca0410f516)
 #
-#   replica_timeout_in_seconds = 300
-#   replica_retry_limit        = 0
-#
-#   manual_trigger_config {
-#     parallelism              = 1
-#     replica_completion_count = 1
-#   }
-#
-#   template {
-#     container {
-#       name   = "job-aca0410f516"
-#       image  = "mcr.microsoft.com/k8se/quickstart-jobs:latest"
-#       cpu    = 0.25
-#       memory = "0.5Gi"
-#     }
-#   }
-#
-#   tags = {
-#     demo    = "cloud-import"
-#     agent   = "codex"
-#     created = "2026-04-10"
-#     purpose = "aca-import"
-#   }
-# }
-#
-# import {
-#   to = azurerm_container_app_job.job_aca
-#   id = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a/resourceGroups/rg-aca0410f516-northeurope/providers/Microsoft.App/jobs/job-aca0410f516"
-# }
+# To import these resources:
+# 1. Update backend.tf to use provider version >= 3.51.0
+# 2. Uncomment and adapt the resource definitions below
+# 3. Run terraform init -upgrade
+# 4. Run terraform plan to import
+# ============================================================================
