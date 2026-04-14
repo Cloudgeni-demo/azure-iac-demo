@@ -46,7 +46,7 @@ resource "azurerm_subnet" "snet_aca_infra" {
     }
   }
 
-  private_endpoint_network_policies = "Disabled"
+  private_endpoint_network_policies_enabled = false
 }
 
 import {
@@ -146,38 +146,42 @@ import {
 }
 
 # Container App Job
-resource "azurerm_container_app_job" "job_aca" {
-  name                         = "job-aca0410f516"
-  location                     = "northeurope"
-  resource_group_name          = module.rg_aca.rg_name
-  container_app_environment_id = azurerm_container_app_environment.cae_aca.id
+# NOTE: azurerm_container_app_job requires provider version >= 3.51.0
+# Current provider version is 3.50.0, so this resource is commented out
+# To import this resource, upgrade the provider version in backend.tf
 
-  replica_timeout_in_seconds = 300
-  replica_retry_limit        = 0
-
-  manual_trigger_config {
-    parallelism              = 1
-    replica_completion_count = 1
-  }
-
-  template {
-    container {
-      name   = "job-aca0410f516"
-      image  = "mcr.microsoft.com/k8se/quickstart-jobs:latest"
-      cpu    = 0.25
-      memory = "0.5Gi"
-    }
-  }
-
-  tags = {
-    demo    = "cloud-import"
-    agent   = "codex"
-    created = "2026-04-10"
-    purpose = "aca-import"
-  }
-}
-
-import {
-  to = azurerm_container_app_job.job_aca
-  id = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a/resourceGroups/rg-aca0410f516-northeurope/providers/Microsoft.App/jobs/job-aca0410f516"
-}
+# resource "azurerm_container_app_job" "job_aca" {
+#   name                         = "job-aca0410f516"
+#   location                     = "northeurope"
+#   resource_group_name          = module.rg_aca.rg_name
+#   container_app_environment_id = azurerm_container_app_environment.cae_aca.id
+#
+#   replica_timeout_in_seconds = 300
+#   replica_retry_limit        = 0
+#
+#   manual_trigger_config {
+#     parallelism              = 1
+#     replica_completion_count = 1
+#   }
+#
+#   template {
+#     container {
+#       name   = "job-aca0410f516"
+#       image  = "mcr.microsoft.com/k8se/quickstart-jobs:latest"
+#       cpu    = 0.25
+#       memory = "0.5Gi"
+#     }
+#   }
+#
+#   tags = {
+#     demo    = "cloud-import"
+#     agent   = "codex"
+#     created = "2026-04-10"
+#     purpose = "aca-import"
+#   }
+# }
+#
+# import {
+#   to = azurerm_container_app_job.job_aca
+#   id = "/subscriptions/d647bcfd-4832-43d4-b02c-a82aeb620c2a/resourceGroups/rg-aca0410f516-northeurope/providers/Microsoft.App/jobs/job-aca0410f516"
+# }
