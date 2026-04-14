@@ -32,21 +32,20 @@ import {
 }
 
 # Subnet with delegation for Container Apps
+# NOTE: Microsoft.App/environments delegation requires provider version >= 3.51.0
+# The delegation is managed by Azure when the Container App Environment is created
+# Lifecycle policy ignores delegation changes to prevent drift
 resource "azurerm_subnet" "snet_aca_infra" {
   name                 = "snet-aca-infra"
   resource_group_name  = module.rg_aca.rg_name
   virtual_network_name = azurerm_virtual_network.vnet_aca.name
   address_prefixes     = ["10.42.0.0/23"]
 
-  delegation {
-    name = "0"
-    service_delegation {
-      name    = "Microsoft.App/environments"
-      actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
-    }
-  }
-
   private_endpoint_network_policies_enabled = false
+
+  lifecycle {
+    ignore_changes = [delegation]
+  }
 }
 
 import {
