@@ -1,3 +1,12 @@
+variable "tags" {
+  type = map(string)
+  default = {
+    environment = "test"
+    project     = "e2e-test"
+  }
+  description = "Default tags to apply to resources"
+}
+
 provider "azurerm" {
   features {
     resource_group {
