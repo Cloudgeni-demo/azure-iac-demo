@@ -7,10 +7,18 @@ provider "azurerm" {
   skip_provider_registration = false
 }
 
+variable "tags" {
+  description = "A map of tags to assign to resources"
+  type        = map(string)
+  default = {
+    environment = "test"
+    project     = "e2e-test"
+  }
+}
 
 locals {
   region = "westus"
-  tags   = {}
+  tags   = var.tags
   suffix = "mywplab"
 }
 
