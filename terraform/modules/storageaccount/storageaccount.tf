@@ -8,7 +8,8 @@ resource "azurerm_storage_account" "storage_account" {
   account_replication_type  = var.account_replication_type
   is_hns_enabled            = var.is_hns_enabled
   enable_https_traffic_only = var.enable_https_traffic_only
-  public_network_access_enabled   = var.public_network_access_enabled 
+  public_network_access_enabled   = var.public_network_access_enabled
+   
   nfsv3_enabled             = var.nfsv3_enabled
   min_tls_version           = var.min_tls_version
   tags                      = var.tags
@@ -53,6 +54,20 @@ resource "azurerm_storage_container" "container" {
   container_access_type = var.containers[count.index].container_access_type
 
   count = length(var.containers) > 0 ? length(var.containers) : 0
+  depends_on = [
+    azurerm_storage_account.storage_account
+  ]
+}
+
+resource "null_resource" "disallow_public_blob_access" {
+  triggers = {
+    storage_account_id = azurerm_storage_account.storage_account.id
+  }
+
+  provisioner "local-exec" {
+    command = "az storage account update --name ${azurerm_storage_account.storage_account.name} --resource-group ${azurerm_storage_account.storage_account.resource_group_name} --allow-blob-public-access false"
+  }
+
   depends_on = [
     azurerm_storage_account.storage_account
   ]
