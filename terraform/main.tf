@@ -7,6 +7,11 @@ provider "azurerm" {
   skip_provider_registration = false
 }
 
+resource "azurerm_resource_group" "rg_amarildo_bicep" {
+  name     = "rg-amarildo-bicep"
+  location = "northeurope"
+}
+
 
 locals {
   region = "westus"
