@@ -3,6 +3,7 @@ resource "azurerm_monitor_autoscale_setting" "vmss_autoscale" {
   resource_group_name = var.resource_group_name
   location            = var.location
   target_resource_id  = azurerm_linux_virtual_machine_scale_set.vmss.id
+  enabled             = false
 
   profile {
     name = "defaultProfile"
