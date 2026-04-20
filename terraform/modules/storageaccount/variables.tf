@@ -120,3 +120,21 @@ variable "access_tier" {
   type = string
   default = "Hot"
 }
+
+variable "enable_cmk_encryption" {
+  description = "Enable Customer Managed Key encryption for the storage account"
+  type        = bool
+  default     = false
+}
+
+variable "key_vault_id" {
+  description = "The ID of the Key Vault containing the encryption key"
+  type        = string
+  default     = null
+}
+
+variable "key_vault_key_name" {
+  description = "The name of the Key Vault Key to use for encryption"
+  type        = string
+  default     = null
+}

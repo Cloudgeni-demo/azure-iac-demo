@@ -21,6 +21,20 @@ module "resource_group" {
 
 }
 
+module "keyvault" {
+  source                     = "./modules/keyvault"
+  key_vault_name             = "kv-${local.suffix}"
+  resource_group             = module.resource_group.rg_name
+  region                     = local.region
+  sku_name                   = "standard"
+  soft_delete_retention_days = 7
+  purge_protection_enabled   = false
+  key_name                   = "storage-encryption-key"
+  key_type                   = "RSA"
+  key_size                   = 2048
+  tags                       = local.tags
+}
+
 module "network" {
   source         = "./modules/network"
   name           = local.suffix
@@ -58,6 +72,9 @@ module "storageaccount" {
   is_hns_enabled            = true
   nfsv3_enabled             = true
   enable_lock               = true
+  enable_cmk_encryption     = true
+  key_vault_id              = module.keyvault.key_vault_id
+  key_vault_key_name        = module.keyvault.key_name
   containers = [
     {
       name                  = "wordpress-content"
@@ -82,6 +99,10 @@ module "storageaccount" {
     }
   ]
   tags = local.tags
+
+  depends_on = [
+    module.keyvault
+  ]
 }
 
 module "vmss" {
