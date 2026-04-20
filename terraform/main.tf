@@ -169,3 +169,32 @@ module "azure-postgresql" {
   ]
 }
 
+resource "azurerm_monitor_action_group" "action_group" {
+  name                = "default-action-group"
+  resource_group_name = module.resource_group.rg_name
+  short_name          = "defaultag"
+
+  email_receiver {
+    name          = "email"
+    email_address = "email@email.com"
+  }
+}
+
+resource "azurerm_monitor_activity_log_alert" "security_solution_alert" {
+  name                = "Create or Update Security Solution Alert"
+  resource_group_name = module.resource_group.rg_name
+  scopes              = ["/subscriptions/${data.azurerm_client_config.current.subscription_id}"]
+  description         = "Alerts when a security solution is created or updated."
+
+  criteria {
+    operation_name = "Microsoft.Security/securitySolutions/write"
+    category       = "Administrative"
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.action_group.id
+  }
+}
+
+data "azurerm_client_config" "current" {}
+
