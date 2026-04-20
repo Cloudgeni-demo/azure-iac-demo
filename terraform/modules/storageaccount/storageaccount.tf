@@ -8,10 +8,20 @@ resource "azurerm_storage_account" "storage_account" {
   account_replication_type  = var.account_replication_type
   is_hns_enabled            = var.is_hns_enabled
   enable_https_traffic_only = var.enable_https_traffic_only
-  public_network_access_enabled   = var.public_network_access_enabled 
+  public_network_access_enabled   = var.public_network_access_enabled
   nfsv3_enabled             = var.nfsv3_enabled
   min_tls_version           = var.min_tls_version
   tags                      = var.tags
+
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [var.user_assigned_identity_id]
+  }
+
+  customer_managed_key {
+    key_vault_key_id          = var.key_vault_key_id
+    user_assigned_identity_id = var.user_assigned_identity_id
+  }
 
   dynamic "network_rules" {
     #check if network_rules has any rule to set below block
