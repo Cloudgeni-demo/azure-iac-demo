@@ -7,6 +7,7 @@ provider "azurerm" {
   skip_provider_registration = false
 }
 
+data "azurerm_client_config" "current" {}
 
 locals {
   region = "westus"
@@ -58,6 +59,11 @@ module "storageaccount" {
   is_hns_enabled            = true
   nfsv3_enabled             = true
   enable_lock               = true
+  customer_managed_key = {
+    key_vault_key_id          = module.keyvault.key_vault_key_id
+    user_assigned_identity_id = module.user_assigned_identity.id
+  }
+  identity_ids = [module.user_assigned_identity.id]
   containers = [
     {
       name                  = "wordpress-content"
@@ -82,6 +88,30 @@ module "storageaccount" {
     }
   ]
   tags = local.tags
+}
+
+
+module "user_assigned_identity" {
+  source              = "./modules/user_assigned_identity"
+  name                = "identity-${local.suffix}"
+  resource_group_name = module.resource_group.rg_name
+  location            = local.region
+  tags                = local.tags
+}
+
+module "keyvault" {
+  source              = "./modules/keyvault"
+  key_vault_name      = "kv-${local.suffix}"
+  resource_group_name = module.resource_group.rg_name
+  location            = local.region
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  tags                = local.tags
+}
+
+resource "azurerm_role_assignment" "storage_account_key_vault_access" {
+  scope                = module.keyvault.key_vault_id
+  role_definition_name = "Key Vault Crypto Service Encryption User"
+  principal_id         = module.user_assigned_identity.principal_id
 }
 
 module "vmss" {
