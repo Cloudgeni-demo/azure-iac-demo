@@ -24,7 +24,8 @@ resource "azurerm_postgresql_flexible_server" "postgresql_flexible_server" {
   lifecycle {
     ignore_changes = [
       zone,
-      high_availability.0.standby_availability_zone
+      high_availability.0.standby_availability_zone,
+      administrator_password
     ]
   }
 }
