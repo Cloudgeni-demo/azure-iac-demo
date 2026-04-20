@@ -13,6 +13,16 @@ resource "azurerm_storage_account" "storage_account" {
   min_tls_version           = var.min_tls_version
   tags                      = var.tags
 
+  identity {
+    type         = "UserAssigned"
+    identity_ids = var.identity_ids
+  }
+
+  customer_managed_key {
+    key_vault_key_id = "${var.key_vault_uri}keys/${var.key_name}"
+    user_assigned_identity_id = var.identity_ids[0]
+  }
+
   dynamic "network_rules" {
     #check if network_rules has any rule to set below block
     for_each = var.network_rules

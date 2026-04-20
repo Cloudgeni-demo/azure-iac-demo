@@ -120,3 +120,21 @@ variable "access_tier" {
   type = string
   default = "Hot"
 }
+
+variable "identity_ids" {
+  type        = list(string)
+  description = "The list of identity ids"
+  default = null
+}
+
+variable "key_vault_uri" {
+    type = string
+    description = "The uri of the key vault"
+    default = null
+}
+
+variable "key_name" {
+    type = string
+    description = "The name of the key"
+    default = null
+}
