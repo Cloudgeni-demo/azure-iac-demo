@@ -204,3 +204,9 @@ variable "lb_subnet_id" {
   default = ""
   
 }
+
+variable "encryption_at_host_enabled" {
+  description = "Enable encryption at host for the virtual machine scale set."
+  type        = bool
+  default     = true
+}

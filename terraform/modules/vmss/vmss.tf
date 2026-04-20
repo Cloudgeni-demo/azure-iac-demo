@@ -10,6 +10,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss" {
   custom_data         = var.custom_data != "" ? var.custom_data : null
   zones               = var.zones
   zone_balance        = var.zone_balance
+  encryption_at_host_enabled = var.encryption_at_host_enabled
 
 
   admin_ssh_key {
