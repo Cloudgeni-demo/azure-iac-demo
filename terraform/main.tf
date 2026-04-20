@@ -140,6 +140,33 @@ module "vmss" {
 }
 
 
+data "azurerm_subscription" "current" {}
+
+module "action_group" {
+  source              = "./modules/action_group"
+  name                = "delete-nsg-action-group"
+  resource_group_name = module.resource_group.rg_name
+  short_name          = "delnsg"
+}
+
+resource "azurerm_monitor_activity_log_alert" "delete_nsg_alert" {
+  name                = "delete-nsg-alert"
+  resource_group_name = module.resource_group.rg_name
+  scopes              = ["/subscriptions/${data.azurerm_subscription.current.subscription_id}"]
+  description         = "This alert fires when a Network Security Group is deleted."
+
+  criteria {
+    operation_name = "Microsoft.Network/networkSecurityGroups/delete"
+    category       = "Administrative"
+  }
+
+  action {
+    action_group_id = module.action_group.id
+  }
+
+  tags = local.tags
+}
+
 module "azure-postgresql" {
   source                             = "./modules/postgresql"
   resource_group                     = module.resource_group.rg_name
