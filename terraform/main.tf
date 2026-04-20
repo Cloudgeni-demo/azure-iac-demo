@@ -140,9 +140,20 @@ module "vmss" {
 }
 
 
+
+module "network_watcher" {
+  source                    = "./modules/network-watcher"
+  name                      = local.suffix
+  resource_group_name       = module.resource_group.rg_name
+  region                    = local.region
+  network_security_group_id = module.network.nsg_id
+  flow_log_name             = "flowlog-${local.suffix}"
+}
+
 module "azure-postgresql" {
   source                             = "./modules/postgresql"
   resource_group                     = module.resource_group.rg_name
+
   region                             = local.region
   resource_postgresql_name           = "postgresqlf-${local.suffix}"
   database_name                      = "wordpress"
