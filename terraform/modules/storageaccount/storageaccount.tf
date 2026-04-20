@@ -47,14 +47,5 @@ resource "azurerm_storage_account" "storage_account" {
   }
 }
 
-resource "azurerm_storage_container" "container" {
-  name                  = var.containers[count.index].name
-  storage_account_name  = azurerm_storage_account.storage_account.name
-  container_access_type = var.containers[count.index].container_access_type
 
-  count = length(var.containers) > 0 ? length(var.containers) : 0
-  depends_on = [
-    azurerm_storage_account.storage_account
-  ]
-}
 
