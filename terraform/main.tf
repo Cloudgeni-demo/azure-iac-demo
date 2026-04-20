@@ -45,6 +45,20 @@ module "network" {
 
 
 
+data "azurerm_client_config" "current" {}
+
+module "keyvault" {
+  source          = "./modules/keyvault"
+  kv_name         = "kv-${local.suffix}"
+  resource_group  = module.resource_group.rg_name
+  region          = local.region
+  tenant_id       = data.azurerm_client_config.current.tenant_id
+  key_name        = "storage-key"
+  identity_name   = "storage-identity-${local.suffix}"
+  allowed_ips     = [module.network.my_ip]
+  tags            = local.tags
+}
+
 module "storageaccount" {
   source = "./modules/storageaccount"
 
@@ -58,6 +72,9 @@ module "storageaccount" {
   is_hns_enabled            = true
   nfsv3_enabled             = true
   enable_lock               = true
+  identity_id               = module.keyvault.identity_id
+  key_vault_id              = module.keyvault.key_vault_id
+  key_name                  = "storage-key"
   containers = [
     {
       name                  = "wordpress-content"
