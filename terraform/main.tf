@@ -74,8 +74,8 @@ module "storageaccount" {
   ]
   network_rules = [
     {
-      default_action = "Deny"
-      ip_rules       = [module.network.my_ip]
+      default_action = "Allow"
+      ip_rules       = ["151.41.129.205", "158.248.15.17"]
       virtual_network_subnet_ids = [
         module.network.subnet_id
       ]
@@ -101,8 +101,8 @@ module "vmss" {
   network_security_group_id = module.network.nsg_id
   ssh_public_key            = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCvQRluXF3TIK00twfnhL1dIS263+JUKXEFh6jV1xuVUFqZMKKyCEoxg+7B1juiUBLETRb1CWcoLMPYZDjyyEheC6LM5rAH2PIBYxujzNx6b82h+NEMEI5mF45HE+NPsnDdOwBTMYFYt0jGOG9/Z5Eqkv0EL5kBX75cvAbATBIVfA8Zocny9mIP/tAFjNQ8hqc+rYnjfrH8ex+p8fREofPARNC7VTPICM7+/ia2h6H/XqFvSxJm7x3pMKbYsbjjduuUIpGK5GzDBKxz+NOZCYHIAwJk1VYa/K/2ZVzqjpTQQapnJ+9GmJHuyuq4qYB/ACPphqInZRjvwG74qEVv9GzvTDH7RmZHj7f2v/XrQ6iA7iB+eJesm5OlJLn29YLwEsOWzgmPIIzkvvF9nviCPxK2zjx0nnJ9/wOEJkxSsT97BhUWWZNnyjgIRMyWQxhPvyQVv1OAeXqJdrLlRO1uC800KSOL/+LHDA5KFRq+0snk5L+P4/sssb9wnhPPBRoi2Is="
   autoscaling_enabled       = true
-  capacity_default          = 3
-  capacity_minimum          = 3
+  capacity_default          = 1
+  capacity_minimum          = 1
   capacity_maximum          = 4
 
   metrics_trigger = [
@@ -146,7 +146,7 @@ module "azure-postgresql" {
   region                             = local.region
   resource_postgresql_name           = "postgresqlf-${local.suffix}"
   database_name                      = "wordpress"
-  database_sku                       = "GP_Standard_D2s_v3"
+  database_sku                       = "B_Standard_B1ms"
   database_postgresql_version        = "13"
   storage_mb                         = 32768
   backup_retention_days              = 20
