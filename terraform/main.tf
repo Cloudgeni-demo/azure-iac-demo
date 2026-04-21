@@ -140,6 +140,22 @@ module "vmss" {
 }
 
 
+module "action_group" {
+  source              = "./modules/action_group"
+  action_group_name   = "ag-mywplab"
+  resource_group_name = module.resource_group.rg_name
+  short_name          = "agmywplab"
+}
+
+module "monitoring" {
+  source              = "./modules/monitoring"
+  resource_group_name = module.resource_group.rg_name
+  subscription_id     = data.azurerm_subscription.current.id
+  action_group_id     = module.action_group.id
+}
+
+data "azurerm_subscription" "current" {}
+
 module "azure-postgresql" {
   source                             = "./modules/postgresql"
   resource_group                     = module.resource_group.rg_name
