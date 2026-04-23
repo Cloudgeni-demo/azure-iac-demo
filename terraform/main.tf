@@ -169,3 +169,11 @@ module "azure-postgresql" {
   ]
 }
 
+data "azurerm_subscription" "primary" {}
+
+resource "azurerm_role_assignment" "subscription_owner" {
+  scope                = data.azurerm_subscription.primary.id
+  role_definition_name = "Owner"
+  principal_id         = var.second_owner_principal_id
+}
+
