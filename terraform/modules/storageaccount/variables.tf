@@ -120,3 +120,15 @@ variable "access_tier" {
   type = string
   default = "Hot"
 }
+
+variable "customer_managed_key_enabled" {
+  description = "Enable/disable customer managed key encryption."
+  type        = bool
+  default     = false
+}
+
+variable "key_vault_name" {
+  description = "Name of the key vault to store the encryption key."
+  type        = string
+  default     = ""
+}
