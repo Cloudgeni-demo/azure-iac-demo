@@ -40,3 +40,23 @@ variable "private_dns_name" {
     default = "privatelink.mysql.database.azure.com"
   
 }
+
+variable "storage_account_id" {
+  description = "ID of the storage account"
+  type        = string
+}
+
+variable "log_analytics_workspace_id" {
+  description = "ID of the log analytics workspace"
+  type        = string
+}
+
+variable "log_analytics_workspace_location" {
+  description = "Location of the log analytics workspace"
+  type        = string
+}
+
+variable "log_analytics_workspace_resource_id" {
+  description = "Resource ID of the log analytics workspace"
+  type        = string
+}

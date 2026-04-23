@@ -22,10 +22,14 @@ module "resource_group" {
 }
 
 module "network" {
-  source         = "./modules/network"
-  name           = local.suffix
-  resource_group = module.resource_group.rg_name
-  region         = local.region
+  source                                = "./modules/network"
+  name                                  = local.suffix
+  resource_group                        = module.resource_group.rg_name
+  region                                = local.region
+  storage_account_id                    = module.storageaccount.id
+  log_analytics_workspace_id            = module.loganalytics.workspace_id
+  log_analytics_workspace_location      = module.loganalytics.location
+  log_analytics_workspace_resource_id = module.loganalytics.id
   security_rules = [
     {
       name                       = "AllowHttp"
@@ -42,6 +46,15 @@ module "network" {
   ]
 
 }
+
+module "loganalytics" {
+  source              = "./modules/loganalytics"
+  name                = "log-${local.suffix}"
+  location            = local.region
+  resource_group_name = module.resource_group.rg_name
+  tags                = local.tags
+}
+
 
 
 
