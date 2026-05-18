@@ -13,6 +13,10 @@ resource "azurerm_storage_account" "storage_account" {
   min_tls_version           = var.min_tls_version
   tags                      = var.tags
 
+  identity {
+    type = "SystemAssigned"
+  }
+
   dynamic "network_rules" {
     #check if network_rules has any rule to set below block
     for_each = var.network_rules
@@ -45,6 +49,12 @@ resource "azurerm_storage_account" "storage_account" {
 
     }
   }
+}
+
+resource "azurerm_storage_account_customer_managed_key" "cmk" {
+  storage_account_id = azurerm_storage_account.storage_account.id
+  key_vault_id       = var.key_vault_id
+  key_name           = var.key_name
 }
 
 resource "azurerm_storage_container" "container" {
