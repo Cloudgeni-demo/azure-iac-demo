@@ -1,3 +1,12 @@
+variable "tags" {
+  description = "Tags to apply to all resources"
+  type        = map(string)
+  default = {
+    environment = "test"
+    project     = "e2e-test"
+  }
+}
+
 provider "azurerm" {
   features {
     resource_group {
@@ -10,7 +19,7 @@ provider "azurerm" {
 
 locals {
   region = "westus"
-  tags   = {}
+  tags   = var.tags
   suffix = "mywplab"
 }
 
