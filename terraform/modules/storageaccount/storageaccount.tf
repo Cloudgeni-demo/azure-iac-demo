@@ -1,3 +1,9 @@
+resource "azurerm_user_assigned_identity" "storage_identity" {
+  location            = var.region
+  name                = "${var.storage_account_name}-identity"
+  resource_group_name = var.resource_group
+}
+
 resource "azurerm_storage_account" "storage_account" {
   name                      = var.storage_account_name
   resource_group_name       = var.resource_group
@@ -8,10 +14,18 @@ resource "azurerm_storage_account" "storage_account" {
   account_replication_type  = var.account_replication_type
   is_hns_enabled            = var.is_hns_enabled
   enable_https_traffic_only = var.enable_https_traffic_only
-  public_network_access_enabled   = var.public_network_access_enabled 
+  public_network_access_enabled   = var.public_network_access_enabled
   nfsv3_enabled             = var.nfsv3_enabled
   min_tls_version           = var.min_tls_version
   tags                      = var.tags
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.storage_identity.id]
+  }
+  customer_managed_key {
+    key_vault_key_id          = var.customer_managed_key_vault_key_id
+    user_assigned_identity_id = azurerm_user_assigned_identity.storage_identity.id
+  }
 
   dynamic "network_rules" {
     #check if network_rules has any rule to set below block
@@ -45,6 +59,18 @@ resource "azurerm_storage_account" "storage_account" {
 
     }
   }
+}
+
+resource "azurerm_key_vault_access_policy" "storage_account_access" {
+  key_vault_id = var.key_vault_id
+  tenant_id    = var.tenant_id
+  object_id    = azurerm_user_assigned_identity.storage_identity.principal_id
+
+  key_permissions = [
+    "Get",
+    "UnwrapKey",
+    "WrapKey",
+  ]
 }
 
 resource "azurerm_storage_container" "container" {
