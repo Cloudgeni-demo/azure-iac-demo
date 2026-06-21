@@ -82,6 +82,7 @@ module "storageaccount" {
     }
   ]
   tags = local.tags
+  infrastructure_encryption_enabled = true
 }
 
 module "vmss" {
