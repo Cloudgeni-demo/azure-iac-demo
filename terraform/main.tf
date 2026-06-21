@@ -7,6 +7,14 @@ provider "azurerm" {
   skip_provider_registration = false
 }
 
+variable "tags" {
+  description = "A map of tags to apply to resources"
+  type        = map(string)
+  default = {
+    environment = "test"
+    project     = "e2e-test"
+  }
+}
 
 locals {
   region = "westus"
