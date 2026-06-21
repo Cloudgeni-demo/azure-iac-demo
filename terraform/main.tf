@@ -48,16 +48,20 @@ module "network" {
 module "storageaccount" {
   source = "./modules/storageaccount"
 
-  resource_group            = module.resource_group.rg_name
-  storage_account_name      = "sa${local.suffix}"
-  region                    = local.region
-  account_tier              = "Standard"
-  account_replication_type  = "LRS"
-  account_kind              = "StorageV2"
-  enable_https_traffic_only = false #Unsupported with NFS
-  is_hns_enabled            = true
-  nfsv3_enabled             = true
-  enable_lock               = true
+  resource_group                 = module.resource_group.rg_name
+  storage_account_name           = "sa${local.suffix}"
+  region                         = local.region
+  account_tier                   = "Standard"
+  account_replication_type       = "LRS"
+  account_kind                   = "StorageV2"
+  enable_https_traffic_only      = false #Unsupported with NFS
+  is_hns_enabled                 = true
+  nfsv3_enabled                  = true
+  enable_lock                    = true
+  public_network_access_enabled  = false
+  subnet_id_private_endpoint     = module.network.subnet_id
+  name_private_link_ids          = module.network.private_dns_zone_ids
+  subresource_names_private_endpoint = ["blob", "dfs"]
   containers = [
     {
       name                  = "wordpress-content"
@@ -74,8 +78,8 @@ module "storageaccount" {
   ]
   network_rules = [
     {
-      default_action = "Deny"
-      ip_rules       = [module.network.my_ip]
+      default_action             = "Deny"
+      ip_rules                   = [module.network.my_ip]
       virtual_network_subnet_ids = [
         module.network.subnet_id
       ]

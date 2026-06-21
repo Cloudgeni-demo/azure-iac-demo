@@ -9,3 +9,7 @@ output "nsg_id" {
 output "my_ip" {
     value = "${chomp(data.http.myip.body)}"
 }
+
+output "private_dns_zone_ids" {
+  value = [azurerm_private_dns_zone.blob_private_dns_zone.id, azurerm_private_dns_zone.dfs_private_dns_zone.id]
+}
