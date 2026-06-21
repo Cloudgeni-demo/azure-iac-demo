@@ -58,6 +58,14 @@ module "storageaccount" {
   is_hns_enabled            = true
   nfsv3_enabled             = true
   enable_lock               = true
+  public_network_access_enabled = false
+  subnet_id_private_endpoint = module.network.subnet_id
+  subresource_names_private_endpoint = ["blob", "file", "dfs"]
+  name_private_link_ids = [
+    azurerm_private_dns_zone.dns_zone_blob.id,
+    azurerm_private_dns_zone.dns_zone_file.id,
+    azurerm_private_dns_zone.dns_zone_dfs.id
+  ]
   containers = [
     {
       name                  = "wordpress-content"
