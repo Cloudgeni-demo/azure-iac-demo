@@ -2,7 +2,18 @@ variable "resource_group" {
   description = "Resource group for storage account."
 }
 
+variable "customer_managed_key" {
+  type = object({
+    key_vault_id  = string
+    key_name      = string
+    key_version   = string
+  })
+  description = "Customer managed key for storage account encryption."
+  default     = null
+}
+
 variable "storage_account_name" {
+
   description = "Name of storage account."
 }
 
