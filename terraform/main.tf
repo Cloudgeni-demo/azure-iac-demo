@@ -81,6 +81,7 @@ module "storageaccount" {
       ]
     }
   ]
+  subnet_id_private_endpoint = module.network.subnet_id
   tags = local.tags
 }
 
