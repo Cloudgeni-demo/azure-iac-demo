@@ -12,6 +12,10 @@ resource "azurerm_storage_account" "storage_account" {
   nfsv3_enabled             = var.nfsv3_enabled
   min_tls_version           = var.min_tls_version
   tags                      = var.tags
+  identity {
+    type         = var.identity_type
+    identity_ids = var.identity_type == "UserAssigned" ? [var.user_assigned_identity_id] : null
+  }
 
   dynamic "network_rules" {
     #check if network_rules has any rule to set below block

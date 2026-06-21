@@ -120,3 +120,27 @@ variable "access_tier" {
   type = string
   default = "Hot"
 }
+
+variable "key_vault_name" {
+  description = "Name of the key vault"
+  type        = string
+  default     = null
+}
+
+variable "customer_managed_key_enabled" {
+  description = "Enable customer managed key"
+  type        = bool
+  default     = false
+}
+
+variable "user_assigned_identity_id" {
+  description = "The ID of the user assigned identity"
+  type        = string
+  default     = null
+}
+
+variable "identity_type" {
+  description = "The type of identity to create"
+  type        = string
+  default     = "SystemAssigned"
+}
