@@ -7,6 +7,7 @@ provider "azurerm" {
   skip_provider_registration = false
 }
 
+data "azurerm_client_config" "current" {}
 
 locals {
   region = "westus"
@@ -167,5 +168,26 @@ module "azure-postgresql" {
       value = "all"
     }
   ]
+}
+
+resource "azurerm_monitor_action_group" "main" {
+  name                = "critical-alerts-action-group"
+  resource_group_name = module.resource_group.rg_name
+  short_name          = "CritAlerts"
+}
+
+resource "azurerm_monitor_activity_log_alert" "main" {
+  name                = "Public IP Address Created or Updated"
+  resource_group_name = module.resource_group.rg_name
+  scopes              = ["/subscriptions/${data.azurerm_client_config.current.subscription_id}"]
+
+  criteria {
+    operation_name = "Microsoft.Network/publicIPAddresses/write"
+    category       = "Administrative"
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.main.id
+  }
 }
 
