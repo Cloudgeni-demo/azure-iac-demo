@@ -14,6 +14,12 @@ locals {
   suffix = "mywplab"
 }
 
+# NetworkWatcherRG is a special resource group managed by Azure for Network Watcher services
+resource "azurerm_resource_group" "network_watcher_rg" {
+  name     = "NetworkWatcherRG"
+  location = "eastus"
+}
+
 module "resource_group" {
   source = "./modules/resource_group"
   name   = "rgp-mywplab"
