@@ -120,3 +120,15 @@ variable "access_tier" {
   type = string
   default = "Hot"
 }
+
+variable "key_vault_key_id" {
+  description = "The ID of the Key Vault Key to use for encryption."
+  type        = string
+  default     = null
+}
+
+variable "user_assigned_identity_id" {
+  description = "The ID of the User Assigned Identity to use for encryption."
+  type        = string
+  default     = null
+}
