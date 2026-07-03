@@ -37,6 +37,17 @@ module "network" {
       destination_port_range     = 80
       source_address_prefix      = "*"
       destination_address_prefix = "*"
+    },
+    {
+      name                       = "DenySSHFromInternet"
+      priority                   = 110
+      direction                  = "Inbound"
+      access                     = "Deny"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = 22
+      source_address_prefix      = "Internet"
+      destination_address_prefix = "*"
     }
 
   ]
@@ -48,16 +59,17 @@ module "network" {
 module "storageaccount" {
   source = "./modules/storageaccount"
 
-  resource_group            = module.resource_group.rg_name
-  storage_account_name      = "sa${local.suffix}"
-  region                    = local.region
-  account_tier              = "Standard"
-  account_replication_type  = "LRS"
-  account_kind              = "StorageV2"
-  enable_https_traffic_only = false #Unsupported with NFS
-  is_hns_enabled            = true
-  nfsv3_enabled             = true
-  enable_lock               = true
+  resource_group                = module.resource_group.rg_name
+  storage_account_name          = "sa${local.suffix}"
+  region                        = local.region
+  account_tier                  = "Standard"
+  account_replication_type      = "LRS"
+  account_kind                  = "StorageV2"
+  enable_https_traffic_only     = false #Unsupported with NFS - Azure requires false when nfsv3_enabled = true
+  public_network_access_enabled = true  #Required for NFSv3; access is restricted via network_rules below
+  is_hns_enabled                = true
+  nfsv3_enabled                 = true
+  enable_lock                   = true
   containers = [
     {
       name                  = "wordpress-content"

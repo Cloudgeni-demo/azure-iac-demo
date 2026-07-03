@@ -1,18 +1,19 @@
 resource "azurerm_postgresql_flexible_server" "postgresql_flexible_server" {
-  name                         = var.resource_postgresql_name
-  location                     = var.region
-  resource_group_name          = var.resource_group
-  sku_name                     = var.database_sku
-  backup_retention_days        = var.backup_retention_days
-  geo_redundant_backup_enabled = var.geo_redundant_backup
-  administrator_login          = var.database_postgresql_admin_username
-  administrator_password       = var.database_postgresql_admin_password
-  version                      = var.database_postgresql_version
-  delegated_subnet_id          = var.subnet_id != "" ? var.subnet_id : null
-  private_dns_zone_id          = var.private_dns_zone_id != "" ? var.private_dns_zone_id : null
-  tags                         = var.tags
-  zone                         = var.postgresql_zone != "" ? var.postgresql_zone : null
-  storage_mb                   = var.storage_mb
+  name                          = var.resource_postgresql_name
+  location                      = var.region
+  resource_group_name           = var.resource_group
+  sku_name                      = var.database_sku
+  backup_retention_days         = var.backup_retention_days
+  geo_redundant_backup_enabled  = var.geo_redundant_backup
+  administrator_login           = var.database_postgresql_admin_username
+  administrator_password        = var.database_postgresql_admin_password
+  version                       = var.database_postgresql_version
+  delegated_subnet_id           = var.subnet_id != "" ? var.subnet_id : null
+  private_dns_zone_id           = var.private_dns_zone_id != "" ? var.private_dns_zone_id : null
+  public_network_access_enabled = var.public_network_access_enabled
+  tags                          = var.tags
+  zone                          = var.postgresql_zone != "" ? var.postgresql_zone : null
+  storage_mb                    = var.storage_mb
 
   dynamic "high_availability" {
     for_each = var.high_availability_enabled == true ? ["1"] : []

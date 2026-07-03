@@ -124,3 +124,9 @@ variable "server_parameters" {
   type        = list(any)
   default     = []
 }
+
+variable "public_network_access_enabled" {
+  description = "Enable or disable public network access to the PostgreSQL flexible server. Defaults to false for security compliance."
+  type        = bool
+  default     = false
+}
