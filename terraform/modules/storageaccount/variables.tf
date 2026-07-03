@@ -17,8 +17,8 @@ variable "account_tier" {
 }
 
 variable "enable_https_traffic_only" {
-  description = "Enable https-only traffic."
-  default     = false
+  description = "Enable https-only traffic. Should be true unless NFSv3 is enabled (Azure requires false for NFSv3)."
+  default     = true
 }
 
 variable "account_replication_type" {
@@ -32,8 +32,8 @@ variable "containers" {
 }
 
 variable "public_network_access_enabled" {
-  description = "Allow public access to blobs inside the account"
-  default     = true
+  description = "Allow public access to blobs inside the account. Defaults to false for security compliance."
+  default     = false
 }
 variable "account_kind" {
   description = "Kind of account."
@@ -117,6 +117,6 @@ variable "blob_properties" {
 
 variable "access_tier" {
   description = " Defines the access tier for BlobStorage, FileStorage and StorageV2 accounts"
-  type = string
-  default = "Hot"
+  type        = string
+  default     = "Hot"
 }
