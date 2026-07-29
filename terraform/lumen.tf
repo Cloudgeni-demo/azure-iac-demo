@@ -1,15 +1,33 @@
 # Lumen infrastructure resources - imported into IaC management
+#
+# Resources reside in subscription b29dff3d-6e8d-4bb9-a8c0-b2d9fef4fef0
+# (Cloudgeni Primary Subscription), which differs from the default provider
+# subscription. An aliased provider scoped to the correct subscription is
+# used for all resources in this file.
+
+provider "azurerm" {
+  alias           = "lumen"
+  subscription_id = "b29dff3d-6e8d-4bb9-a8c0-b2d9fef4fef0"
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
+  }
+  skip_provider_registration = true
+}
 
 # ---------------------------------------------------------------------------
 # Resource Group
 # ---------------------------------------------------------------------------
 
 import {
-  to = azurerm_resource_group.geni-lumen-test-app
-  id = "/subscriptions/b29dff3d-6e8d-4bb9-a8c0-b2d9fef4fef0/resourceGroups/geni-lumen-test-app"
+  provider = azurerm.lumen
+  to       = azurerm_resource_group.geni-lumen-test-app
+  id       = "/subscriptions/b29dff3d-6e8d-4bb9-a8c0-b2d9fef4fef0/resourceGroups/geni-lumen-test-app"
 }
 
 resource "azurerm_resource_group" "geni-lumen-test-app" {
+  provider = azurerm.lumen
   name     = "geni-lumen-test-app"
   location = "northeurope"
 }
@@ -19,11 +37,13 @@ resource "azurerm_resource_group" "geni-lumen-test-app" {
 # ---------------------------------------------------------------------------
 
 import {
-  to = azurerm_log_analytics_workspace.lumen-logs
-  id = "/subscriptions/b29dff3d-6e8d-4bb9-a8c0-b2d9fef4fef0/resourceGroups/geni-lumen-test-app/providers/Microsoft.OperationalInsights/workspaces/lumen-logs"
+  provider = azurerm.lumen
+  to       = azurerm_log_analytics_workspace.lumen-logs
+  id       = "/subscriptions/b29dff3d-6e8d-4bb9-a8c0-b2d9fef4fef0/resourceGroups/geni-lumen-test-app/providers/Microsoft.OperationalInsights/workspaces/lumen-logs"
 }
 
 resource "azurerm_log_analytics_workspace" "lumen-logs" {
+  provider            = azurerm.lumen
   name                = "lumen-logs"
   location            = azurerm_resource_group.geni-lumen-test-app.location
   resource_group_name = azurerm_resource_group.geni-lumen-test-app.name
@@ -43,11 +63,13 @@ resource "azurerm_log_analytics_workspace" "lumen-logs" {
 # ---------------------------------------------------------------------------
 
 import {
-  to = azurerm_key_vault.lumenkv
-  id = "/subscriptions/b29dff3d-6e8d-4bb9-a8c0-b2d9fef4fef0/resourceGroups/geni-lumen-test-app/providers/Microsoft.KeyVault/vaults/lumenkv"
+  provider = azurerm.lumen
+  to       = azurerm_key_vault.lumenkv
+  id       = "/subscriptions/b29dff3d-6e8d-4bb9-a8c0-b2d9fef4fef0/resourceGroups/geni-lumen-test-app/providers/Microsoft.KeyVault/vaults/lumenkv"
 }
 
 resource "azurerm_key_vault" "lumenkv" {
+  provider                        = azurerm.lumen
   name                            = "lumenkv"
   location                        = azurerm_resource_group.geni-lumen-test-app.location
   resource_group_name             = azurerm_resource_group.geni-lumen-test-app.name
@@ -73,11 +95,13 @@ resource "azurerm_key_vault" "lumenkv" {
 # ---------------------------------------------------------------------------
 
 import {
-  to = azurerm_container_registry.lumenb29dffacr
-  id = "/subscriptions/b29dff3d-6e8d-4bb9-a8c0-b2d9fef4fef0/resourceGroups/geni-lumen-test-app/providers/Microsoft.ContainerRegistry/registries/lumenb29dffacr"
+  provider = azurerm.lumen
+  to       = azurerm_container_registry.lumenb29dffacr
+  id       = "/subscriptions/b29dff3d-6e8d-4bb9-a8c0-b2d9fef4fef0/resourceGroups/geni-lumen-test-app/providers/Microsoft.ContainerRegistry/registries/lumenb29dffacr"
 }
 
 resource "azurerm_container_registry" "lumenb29dffacr" {
+  provider            = azurerm.lumen
   name                = "lumenb29dffacr"
   resource_group_name = azurerm_resource_group.geni-lumen-test-app.name
   location            = azurerm_resource_group.geni-lumen-test-app.location
@@ -97,11 +121,13 @@ resource "azurerm_container_registry" "lumenb29dffacr" {
 # ---------------------------------------------------------------------------
 
 import {
-  to = azurerm_public_ip.lumen-aks-egress-ip
-  id = "/subscriptions/b29dff3d-6e8d-4bb9-a8c0-b2d9fef4fef0/resourceGroups/geni-lumen-test-app/providers/Microsoft.Network/publicIPAddresses/lumen-aks-egress-ip"
+  provider = azurerm.lumen
+  to       = azurerm_public_ip.lumen-aks-egress-ip
+  id       = "/subscriptions/b29dff3d-6e8d-4bb9-a8c0-b2d9fef4fef0/resourceGroups/geni-lumen-test-app/providers/Microsoft.Network/publicIPAddresses/lumen-aks-egress-ip"
 }
 
 resource "azurerm_public_ip" "lumen-aks-egress-ip" {
+  provider                = azurerm.lumen
   name                    = "lumen-aks-egress-ip"
   resource_group_name     = azurerm_resource_group.geni-lumen-test-app.name
   location                = azurerm_resource_group.geni-lumen-test-app.location
@@ -123,11 +149,13 @@ resource "azurerm_public_ip" "lumen-aks-egress-ip" {
 # ---------------------------------------------------------------------------
 
 import {
-  to = azurerm_kubernetes_cluster.lumen-aks
-  id = "/subscriptions/b29dff3d-6e8d-4bb9-a8c0-b2d9fef4fef0/resourceGroups/geni-lumen-test-app/providers/Microsoft.ContainerService/managedClusters/lumen-aks"
+  provider = azurerm.lumen
+  to       = azurerm_kubernetes_cluster.lumen-aks
+  id       = "/subscriptions/b29dff3d-6e8d-4bb9-a8c0-b2d9fef4fef0/resourceGroups/geni-lumen-test-app/providers/Microsoft.ContainerService/managedClusters/lumen-aks"
 }
 
 resource "azurerm_kubernetes_cluster" "lumen-aks" {
+  provider            = azurerm.lumen
   name                = "lumen-aks"
   location            = azurerm_resource_group.geni-lumen-test-app.location
   resource_group_name = azurerm_resource_group.geni-lumen-test-app.name
@@ -196,11 +224,13 @@ resource "azurerm_kubernetes_cluster" "lumen-aks" {
 # ---------------------------------------------------------------------------
 
 import {
-  to = azurerm_postgresql_flexible_server.lumen-staging-postgres
-  id = "/subscriptions/b29dff3d-6e8d-4bb9-a8c0-b2d9fef4fef0/resourceGroups/geni-lumen-test-app/providers/Microsoft.DBforPostgreSQL/flexibleServers/lumen-staging-postgres"
+  provider = azurerm.lumen
+  to       = azurerm_postgresql_flexible_server.lumen-staging-postgres
+  id       = "/subscriptions/b29dff3d-6e8d-4bb9-a8c0-b2d9fef4fef0/resourceGroups/geni-lumen-test-app/providers/Microsoft.DBforPostgreSQL/flexibleServers/lumen-staging-postgres"
 }
 
 resource "azurerm_postgresql_flexible_server" "lumen-staging-postgres" {
+  provider               = azurerm.lumen
   name                   = "lumen-staging-postgres"
   resource_group_name    = azurerm_resource_group.geni-lumen-test-app.name
   location               = azurerm_resource_group.geni-lumen-test-app.location
@@ -236,20 +266,21 @@ resource "azurerm_postgresql_flexible_server" "lumen-staging-postgres" {
 # ---------------------------------------------------------------------------
 
 import {
-  to = azurerm_storage_account.lumentfstateb29dff
-  id = "/subscriptions/b29dff3d-6e8d-4bb9-a8c0-b2d9fef4fef0/resourceGroups/geni-lumen-test-app/providers/Microsoft.Storage/storageAccounts/lumentfstateb29dff"
+  provider = azurerm.lumen
+  to       = azurerm_storage_account.lumentfstateb29dff
+  id       = "/subscriptions/b29dff3d-6e8d-4bb9-a8c0-b2d9fef4fef0/resourceGroups/geni-lumen-test-app/providers/Microsoft.Storage/storageAccounts/lumentfstateb29dff"
 }
 
 resource "azurerm_storage_account" "lumentfstateb29dff" {
-  name                     = "lumentfstateb29dff"
-  resource_group_name      = azurerm_resource_group.geni-lumen-test-app.name
-  location                 = azurerm_resource_group.geni-lumen-test-app.location
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-  account_kind             = "StorageV2"
-  access_tier              = "Hot"
-  min_tls_version          = "TLS1_2"
-
+  provider                         = azurerm.lumen
+  name                             = "lumentfstateb29dff"
+  resource_group_name              = azurerm_resource_group.geni-lumen-test-app.name
+  location                         = azurerm_resource_group.geni-lumen-test-app.location
+  account_tier                     = "Standard"
+  account_replication_type         = "LRS"
+  account_kind                     = "StorageV2"
+  access_tier                      = "Hot"
+  min_tls_version                  = "TLS1_2"
   enable_https_traffic_only        = true
   allow_nested_items_to_be_public  = false
   cross_tenant_replication_enabled = false
