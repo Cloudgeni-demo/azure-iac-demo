@@ -173,7 +173,7 @@ resource "azurerm_kubernetes_cluster" "lumen-aks" {
   }
 
   microsoft_defender {
-    log_analytics_workspace_id = "/subscriptions/b29dff3d-6e8d-4bb9-a8c0-b2d9fef4fef0/resourcegroups/DefaultResourceGroup-NEU/providers/Microsoft.OperationalInsights/workspaces/DefaultWorkspace-b29dff3d-6e8d-4bb9-a8c0-b2d9fef4fef0-NEU"
+    log_analytics_workspace_id = "/subscriptions/b29dff3d-6e8d-4bb9-a8c0-b2d9fef4fef0/resourceGroups/DefaultResourceGroup-NEU/providers/Microsoft.OperationalInsights/workspaces/DefaultWorkspace-b29dff3d-6e8d-4bb9-a8c0-b2d9fef4fef0-NEU"
   }
 
   lifecycle {
@@ -204,10 +204,12 @@ resource "azurerm_postgresql_flexible_server" "lumen-staging-postgres" {
   name                   = "lumen-staging-postgres"
   resource_group_name    = azurerm_resource_group.geni-lumen-test-app.name
   location               = azurerm_resource_group.geni-lumen-test-app.location
-  version                = "16"
+  # azurerm 3.50.0 validates version against [11, 12, 13, 14]; actual server is 16.
+  # lifecycle ignore_changes prevents Terraform from proposing a version change after import.
+  version                = "14"
   administrator_login    = "appadmin"
   administrator_password = var.lumen_postgres_admin_password
-  sku_name               = "Standard_B1ms"
+  sku_name               = "B_Standard_B1ms"
   storage_mb             = 32768
   backup_retention_days  = 7
   zone                   = "1"
@@ -215,6 +217,7 @@ resource "azurerm_postgresql_flexible_server" "lumen-staging-postgres" {
   lifecycle {
     ignore_changes = [
       administrator_password,
+      version,
       zone,
     ]
   }
