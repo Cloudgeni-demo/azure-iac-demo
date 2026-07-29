@@ -146,78 +146,13 @@ resource "azurerm_public_ip" "lumen-aks-egress-ip" {
 
 # ---------------------------------------------------------------------------
 # AKS Cluster
+#
+# NOTE: Import of azurerm_kubernetes_cluster.lumen-aks is NOT included here.
+# azurerm ~3.50.0 calls the ManagedClusters API with version 2023-01-02-preview,
+# which is not available in this subscription. Import requires upgrading the
+# azurerm provider constraint to >= 3.51.0.
+# Resource ID: /subscriptions/b29dff3d-6e8d-4bb9-a8c0-b2d9fef4fef0/resourceGroups/geni-lumen-test-app/providers/Microsoft.ContainerService/managedClusters/lumen-aks
 # ---------------------------------------------------------------------------
-
-import {
-  provider = azurerm.lumen
-  to       = azurerm_kubernetes_cluster.lumen-aks
-  id       = "/subscriptions/b29dff3d-6e8d-4bb9-a8c0-b2d9fef4fef0/resourceGroups/geni-lumen-test-app/providers/Microsoft.ContainerService/managedClusters/lumen-aks"
-}
-
-resource "azurerm_kubernetes_cluster" "lumen-aks" {
-  provider            = azurerm.lumen
-  name                = "lumen-aks"
-  location            = azurerm_resource_group.geni-lumen-test-app.location
-  resource_group_name = azurerm_resource_group.geni-lumen-test-app.name
-  dns_prefix          = "lumen-aks"
-  kubernetes_version  = "1.34"
-
-  oidc_issuer_enabled       = true
-  workload_identity_enabled = true
-
-  identity {
-    type = "SystemAssigned"
-  }
-
-  default_node_pool {
-    name            = "system"
-    node_count      = 2
-    vm_size         = "Standard_B2s"
-    max_pods        = 30
-    os_disk_size_gb = 128
-    os_sku          = "Ubuntu"
-    type            = "VirtualMachineScaleSets"
-
-    upgrade_settings {
-      max_surge = "10%"
-    }
-  }
-
-  network_profile {
-    network_plugin    = "azure"
-    load_balancer_sku = "standard"
-    outbound_type     = "loadBalancer"
-    service_cidr      = "10.0.0.0/16"
-    dns_service_ip    = "10.0.0.10"
-
-    load_balancer_profile {
-      outbound_ip_address_ids = [azurerm_public_ip.lumen-aks-egress-ip.id]
-    }
-  }
-
-  oms_agent {
-    log_analytics_workspace_id      = azurerm_log_analytics_workspace.lumen-logs.id
-    msi_auth_for_monitoring_enabled = false
-  }
-
-  microsoft_defender {
-    log_analytics_workspace_id = "/subscriptions/b29dff3d-6e8d-4bb9-a8c0-b2d9fef4fef0/resourceGroups/DefaultResourceGroup-NEU/providers/Microsoft.OperationalInsights/workspaces/DefaultWorkspace-b29dff3d-6e8d-4bb9-a8c0-b2d9fef4fef0-NEU"
-  }
-
-  lifecycle {
-    ignore_changes = [
-      kubernetes_version,
-      windows_profile,
-    ]
-  }
-
-  tags = {
-    app         = "lumen"
-    environment = "shared"
-    layer       = "substrate"
-    managed_by  = "terraform"
-  }
-}
 
 # ---------------------------------------------------------------------------
 # PostgreSQL Flexible Server
@@ -288,6 +223,11 @@ resource "azurerm_storage_account" "lumentfstateb29dff" {
   network_rules {
     default_action = "Allow"
     bypass         = ["AzureServices"]
+
+    private_link_access {
+      endpoint_resource_id = "/subscriptions/b29dff3d-6e8d-4bb9-a8c0-b2d9fef4fef0/providers/Microsoft.Security/datascanners/storageDataScanner"
+      endpoint_tenant_id   = "597bfa71-7575-4506-93d7-dc147bddfb22"
+    }
   }
 
   tags = {
